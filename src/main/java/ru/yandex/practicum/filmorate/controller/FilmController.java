@@ -28,7 +28,7 @@ public class FilmController {
         if (validateDate(film)) {
             film.setId(getNextId());
             films.put(film.getId(), film);
-            log.info("Saved film: " + film);
+            log.info("Saved film: {}", film);
         } else {
             throw new ValidationException("Can't create the film");
         }
@@ -40,7 +40,7 @@ public class FilmController {
         if (films.containsKey(newFilm.getId())) {
             if (validateDate(newFilm)) {
                 films.put(newFilm.getId(), newFilm);
-                log.info("Updated film: " + newFilm);
+                log.info("Updated film: {}", newFilm);
             }
         } else {
             throw new ValidationException("Can't update the film");
