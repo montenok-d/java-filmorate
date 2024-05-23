@@ -20,49 +20,58 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
+        log.info("GET / users");
         return userService.findAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
+        log.info("POST / user / {}", user.getName());
         return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
+        log.info("PUT / user / {}", user.getName());
         return userService.update(user);
     }
 
     @GetMapping("/{id}")
     public User findUserById(@PathVariable("id") int id) {
+        log.info("GET /user/{}", id);
         return userService.findUserById(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable("id") int id) {
+        log.info("DELETE /user/{}", id);
         userService.delete(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") int id,
                           @PathVariable("friendId") int friendId) {
+        log.info("PUT /{}/friends/{}", id, friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") int id,
                              @PathVariable("friendId") int friendId) {
+        log.info("DELETE /{}/friends/{}", id, friendId);
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> findAllFriends(@PathVariable("id") int id) {
+        log.info("PUT /{}/friends", id);
         return userService.findAllFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> findMutualFriends(@PathVariable("id") int id,
                                         @PathVariable("otherId") int otherId) {
+        log.info("PUT /{}/friends/common/{}", id, otherId);
         return userService.findMutualFriends(id, otherId);
     }
 }
