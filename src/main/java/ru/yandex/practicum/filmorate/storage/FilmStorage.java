@@ -12,7 +12,7 @@ public interface FilmStorage {
 
     public Film update(Film film);
 
-    public void delete(int id);
+    public void delete(long id);
 
-    public Optional<Film> findFilmById(int id);
+    public Optional<Film> findFilmById(long id);
 }

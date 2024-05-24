@@ -12,7 +12,7 @@ public interface UserStorage {
 
     public User update(User user);
 
-    public void delete(int id);
+    public void delete(long id);
 
-    public Optional<User> findUserById(int id);
+    public Optional<User> findUserById(long id);
 }

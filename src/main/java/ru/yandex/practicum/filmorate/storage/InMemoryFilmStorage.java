@@ -11,7 +11,7 @@ import java.util.Optional;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     @Override
     public Collection<Film> findAll() {
@@ -32,19 +32,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         films.remove(id);
     }
 
     @Override
-    public Optional<Film> findFilmById(int id) {
+    public Optional<Film> findFilmById(long id) {
         return Optional.ofNullable(films.get(id));
     }
 
-    private int getNextId() {
-        int currentMaxId = films.keySet()
+    private long getNextId() {
+        long currentMaxId = films.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

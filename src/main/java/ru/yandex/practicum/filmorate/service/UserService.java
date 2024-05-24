@@ -27,43 +27,43 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public void delete(int id) {
+    public void delete(long id) {
         findUserById(id);
         userStorage.delete(id);
     }
 
-    public User findUserById(int id) {
+    public User findUserById(long id) {
         return userStorage.findUserById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d не найден", id)));
     }
 
-    public void addFriend(int id, int friendId) {
+    public void addFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(id);
     }
 
-    public void deleteFriend(int id, int friendId) {
+    public void deleteFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(id);
     }
 
-    public List<User> findAllFriends(int id) {
+    public List<User> findAllFriends(long id) {
         User user = findUserById(id);
         List<User> friendsList = new ArrayList<>();
-        Set<Integer> friendsIds = user.getFriends();
+        Set<Long> friendsIds = user.getFriends();
         if (friendsIds != null) {
-            for (Integer friend : friendsIds) {
+            for (Long friend : friendsIds) {
                 friendsList.add(findUserById(friend));
             }
         }
         return friendsList;
     }
 
-    public List<User> findMutualFriends(int firstUser, int secondUser) {
+    public List<User> findMutualFriends(long firstUser, long secondUser) {
         List<User> firstUserFriends = findAllFriends(firstUser);
         List<User> secondUserFriends = findAllFriends(secondUser);
         firstUserFriends.retainAll(secondUserFriends);

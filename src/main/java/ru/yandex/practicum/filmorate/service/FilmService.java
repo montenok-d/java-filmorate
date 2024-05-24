@@ -31,25 +31,25 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public void delete(int id) {
+    public void delete(long id) {
         findFilmById(id);
         filmStorage.delete(id);
     }
 
-    public Film findFilmById(int id) {
+    public Film findFilmById(long id) {
         return filmStorage.findFilmById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d not found", id)));
     }
 
-    public void addLike(int id, int userId) {
+    public void addLike(long id, long userId) {
         if (userService.findUserById(userId) == null) {
             throw new EntityNotFoundException("User does not exist");
         }
         findFilmById(id).getLikes().add(userId);
     }
 
-    public void deleteLike(int id, int userId) {
-        Set<Integer> likes = findFilmById(id).getLikes();
+    public void deleteLike(long id, long userId) {
+        Set<Long> likes = findFilmById(id).getLikes();
         if (!likes.contains(userId)) {
             throw new EntityNotFoundException(String.format("There wasn't like from user with id %d", userId));
         }

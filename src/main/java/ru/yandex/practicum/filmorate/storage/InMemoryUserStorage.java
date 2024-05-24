@@ -11,7 +11,7 @@ import java.util.Optional;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public Collection<User> findAll() {
@@ -33,19 +33,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         users.remove(id);
     }
 
     @Override
-    public Optional<User> findUserById(int id) {
+    public Optional<User> findUserById(long id) {
         return Optional.ofNullable(users.get(id));
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
+    private long getNextId() {
+        long currentMaxId = users.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;
