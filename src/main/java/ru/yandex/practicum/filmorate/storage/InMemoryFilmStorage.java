@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {
-            throw new FilmNotFoundException("Film does not exist");
+            throw new EntityNotFoundException("Film does not exist");
         }
         return film;
     }
@@ -40,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(id)) {
             films.remove(id);
         } else {
-            throw new FilmNotFoundException("Film does not exist");
+            throw new EntityNotFoundException("Film does not exist");
         }
     }
 
@@ -50,7 +50,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .stream()
                 .filter(film -> film.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new FilmNotFoundException(String.format("Film № %d не найден", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d не найден", id)));
     }
 
     private int getNextId() {

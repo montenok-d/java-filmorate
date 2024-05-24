@@ -6,9 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ErrorResponse;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -16,14 +15,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleFilmNotFoundException(final FilmNotFoundException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
+    public ErrorResponse handleFilmNotFoundException(final EntityNotFoundException e) {
         log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

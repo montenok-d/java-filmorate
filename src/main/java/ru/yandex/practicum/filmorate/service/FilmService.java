@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -48,7 +48,7 @@ public class FilmService {
     public void deleteLike(int id, int userId) {
         Set<Integer> likes = findFilmById(id).getLikes();
         if (!likes.contains(userId)) {
-            throw new UserNotFoundException("User does not exist");
+            throw new EntityNotFoundException("User does not exist");
         }
         likes.remove(userId);
     }
