@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final UserService userService;
 
     public Collection<Film> findAll() {
         return filmStorage.findAll();
@@ -28,27 +27,31 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        findFilmById(film.getId());
         return filmStorage.update(film);
     }
 
     public void delete(int id) {
+        findFilmById(id);
         filmStorage.delete(id);
     }
 
     public Film findFilmById(int id) {
-        return filmStorage.findFilmById(id);
+        return filmStorage.findFilmById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d not found", id)));
     }
 
     public void addLike(int id, int userId) {
-        if (userStorage.findUserById(userId) != null) {
-            findFilmById(id).getLikes().add(userId);
+        if (userService.findUserById(userId) == null) {
+            throw new EntityNotFoundException("User does not exist");
         }
+        findFilmById(id).getLikes().add(userId);
     }
 
     public void deleteLike(int id, int userId) {
         Set<Integer> likes = findFilmById(id).getLikes();
         if (!likes.contains(userId)) {
-            throw new EntityNotFoundException("User does not exist");
+            throw new EntityNotFoundException(String.format("There wasn't like from user with id %d", userId));
         }
         likes.remove(userId);
     }
@@ -59,4 +62,5 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
 }

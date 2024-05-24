@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -28,30 +28,18 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-        } else {
-            throw new EntityNotFoundException("User does not exist");
-        }
+        users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public void delete(int id) {
-        if (users.containsKey(id)) {
-            users.remove(id);
-        } else {
-            throw new EntityNotFoundException("User does not exist");
-        }
+        users.remove(id);
     }
 
     @Override
-    public User findUserById(int id) {
-        return users.values()
-                .stream()
-                .filter(u -> u.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d не найден", id)));
+    public Optional<User> findUserById(int id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     private int getNextId() {

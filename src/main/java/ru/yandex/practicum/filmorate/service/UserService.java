@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -22,15 +23,18 @@ public class UserService {
     }
 
     public User update(User user) {
+        findUserById(user.getId());
         return userStorage.update(user);
     }
 
     public void delete(int id) {
+        findUserById(id);
         userStorage.delete(id);
     }
 
     public User findUserById(int id) {
-        return userStorage.findUserById(id);
+        return userStorage.findUserById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d не найден", id)));
     }
 
     public void addFriend(int id, int friendId) {

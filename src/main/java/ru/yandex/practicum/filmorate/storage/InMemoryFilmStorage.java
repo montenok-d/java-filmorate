@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -27,30 +27,18 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-        } else {
-            throw new EntityNotFoundException("Film does not exist");
-        }
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
     public void delete(int id) {
-        if (films.containsKey(id)) {
-            films.remove(id);
-        } else {
-            throw new EntityNotFoundException("Film does not exist");
-        }
+        films.remove(id);
     }
 
     @Override
-    public Film findFilmById(int id) {
-        return films.values()
-                .stream()
-                .filter(film -> film.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d не найден", id)));
+    public Optional<Film> findFilmById(int id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     private int getNextId() {
