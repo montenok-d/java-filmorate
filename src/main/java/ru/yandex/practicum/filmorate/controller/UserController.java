@@ -1,59 +1,77 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        log.info("GET / users");
+        return userService.findAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        user.setId(getNextId());
-        validateName(user);
-        users.put(user.getId(), user);
-        log.info("Created user: {}", user);
-        return user;
+        log.info("POST / user / {}", user.getName());
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Updated user: {}", user);
-        } else {
-            throw new ValidationException("User does not exist");
-        }
-        return user;
+        log.info("PUT / user / {}", user.getName());
+        return userService.update(user);
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @GetMapping("/{id}")
+    public User findUserById(@PathVariable("id") int id) {
+        log.info("GET /user/{}", id);
+        return userService.findUserById(id);
     }
 
-    private void validateName(User user) {
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable("id") int id) {
+        log.info("DELETE /user/{}", id);
+        userService.delete(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable("id") int id,
+                          @PathVariable("friendId") int friendId) {
+        log.info("PUT /{}/friends/{}", id, friendId);
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable("id") int id,
+                             @PathVariable("friendId") int friendId) {
+        log.info("DELETE /{}/friends/{}", id, friendId);
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> findAllFriends(@PathVariable("id") int id) {
+        log.info("PUT /{}/friends", id);
+        return userService.findAllFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> findMutualFriends(@PathVariable("id") int id,
+                                        @PathVariable("otherId") int otherId) {
+        log.info("PUT /{}/friends/common/{}", id, otherId);
+        return userService.findMutualFriends(id, otherId);
     }
 }

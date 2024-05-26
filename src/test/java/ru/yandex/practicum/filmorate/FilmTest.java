@@ -42,7 +42,20 @@ public class FilmTest {
         Film film1 = Film.builder()
                 .name(" ")
                 .description("Description")
-                .releaseDate(LocalDate.parse("1895-12-27"))
+                .releaseDate(LocalDate.parse("1995-12-27"))
+                .duration(100)
+                .build();
+        Set<ConstraintViolation<Film>> violations = validator.validate(film1);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    void shouldNotCreateFilmWithWrongDate() {
+        Film film1 = Film.builder()
+                .name("Name")
+                .description("Description")
+                .releaseDate(LocalDate.parse("1795-12-27"))
                 .duration(100)
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film1);
