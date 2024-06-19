@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
@@ -27,7 +26,9 @@ public class UserDbStorage implements UserStorage {
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM users WHERE id = ?";
     private static final String UPDATE_BY_ID_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? where id = ?";
     private static final String INSERT_NEW_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES(?, ?, ?, ?)";
-    private static final String FIND_FRIENDS_QUERY = "SELECT id FROM users u JOIN FRIENDS f ON u.ID = f.FRIEND_ID WHERE f.USER_ID = ? UNION SELECT id FROM users u JOIN FRIENDS f2 ON u.ID = f2.user_id WHERE f2.friend_id = ? AND STATUS = TRUE ";
+    private static final String FIND_FRIENDS_QUERY = "SELECT * FROM users u JOIN FRIENDS f ON u.ID = f.FRIEND_ID WHERE f.USER_ID = ? UNION SELECT * FROM users u JOIN FRIENDS f2 ON u.ID = f2.user_id WHERE f2.friend_id = ? AND STATUS = TRUE ";
+    private static final String ADD_FRIENDS_QUERY = "INSERT into friends (user_id, friend_id, status) VALUES(?, ?, FALSE)";
+    private static final String DELETE_FRIEND_QUERY = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
@@ -83,9 +84,21 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    public void addFriend(long id, long friendId) {
+    public void addFriend(long userId, long friendId) {
+        jdbc.update(ADD_FRIENDS_QUERY, userId, friendId);
+    }
 
+    @Override
+    public void deleteFriend(long id, long friendId) {
+        jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
+    }
 
+    @Override
+    public List<User> findMutualFriends(long firstUserId, long secondUserId) {
+        List<User> firstUserFriends = findAllFriends(firstUserId);
+        List<User> secondUserFriends = findAllFriends(secondUserId);
+        firstUserFriends.retainAll(secondUserFriends);
+        return firstUserFriends;
     }
 
     public List<User> findAllFriends(long id) {
