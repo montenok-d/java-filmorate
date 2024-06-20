@@ -22,7 +22,7 @@ create TABLE IF NOT EXISTS films (
     description  VARCHAR(255) NOT NULL,
     release_date DATE NOT NULL,
     duration INT NOT NULL,
-    mpa_id BIGINT NOT NULL REFERENCES mpa (id)
+    mpa_id BIGINT REFERENCES mpa (id) ON delete RESTRICT
 );
 
 create TABLE IF NOT EXISTS likes (
@@ -38,6 +38,6 @@ create TABLE IF NOT EXISTS friends (
 );
 
 create TABLE IF NOT EXISTS films_genres (
-    film_id  BIGINT NOT NULL REFERENCES films (id),
-    genre_id BIGINT NOT NULL REFERENCES genres (id)
+    film_id  BIGINT REFERENCES films (id) ON delete CASCADE,
+    genre_id BIGINT NOT NULL REFERENCES genres (id) ON delete RESTRICT
 );
