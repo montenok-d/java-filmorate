@@ -17,7 +17,7 @@ public class GenreDbStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM genres";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM genres WHERE id = ?";
-    private static final String FIND_GENRES_BY_FILM_ID_QUERY = "SELECT * FROM genres JOIN films_genres WHERE film_id = ?";
+    private static final String FIND_GENRES_BY_FILM_ID_QUERY = "SELECT g.id, g.name FROM films_genres fg JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ?";
 
     private final JdbcTemplate jdbc;
     private final GenreRowMapper mapper;

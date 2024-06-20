@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
@@ -18,6 +19,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
     private final MpaService mpaService;
+    private final GenreService genreService;
 
     public Collection<Film> findAll() {
         log.info("filmStorage.findAll");
@@ -25,6 +27,12 @@ public class FilmService {
     }
 
     public Film create(Film film) {
+        mpaService.checkMpaForFilm(film.getMpa().getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                genreService.checkGenreById(genre.getId());
+            }
+        }
         return filmStorage.create(film);
     }
 
