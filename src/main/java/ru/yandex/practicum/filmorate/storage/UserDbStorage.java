@@ -33,6 +33,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
 
+    @Override
     public Collection<User> findAll() {
         return jdbc.query(FIND_ALL_QUERY, mapper);
     }
@@ -84,6 +85,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
+    @Override
     public void addFriend(long userId, long friendId) {
         jdbc.update(ADD_FRIENDS_QUERY, userId, friendId);
     }
@@ -101,6 +103,7 @@ public class UserDbStorage implements UserStorage {
         return firstUserFriends;
     }
 
+    @Override
     public List<User> findAllFriends(long id) {
         return jdbc.query(FIND_FRIENDS_QUERY, mapper, id, id);
     }

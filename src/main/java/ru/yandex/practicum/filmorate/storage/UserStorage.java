@@ -24,4 +24,5 @@ public interface UserStorage {
     public void deleteFriend(long id, long friendId);
 
     public List<User> findMutualFriends(long firstUser, long secondUser);
+
 }
