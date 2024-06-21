@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
@@ -35,14 +33,14 @@ public class FilmDbStorage implements FilmStorage {
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM films WHERE id = ?";
     private static final String UPDATE_BY_ID_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? where id = ?";
     private static final String INSERT_NEW_QUERY = "INSERT INTO films (name, description, release_date, duration, mpa_id) VALUES(?, ?, ?, ?, ?)";
-    private static final String FIND_POPULAR_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, count(l.user_id) as count FROM films f JOIN likes l ON f.id = l.film_id GROUP BY f.id ORDER BY count(l.user_id) desc LIMIT ? ";
+    private static final String FIND_POPULAR_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, " +
+            "count(l.user_id) as count FROM films f JOIN likes l ON f.id = l.film_id GROUP BY f.id ORDER BY count(l.user_id) desc LIMIT ? ";
     private static final String ADD_LIKE_QUERY = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
     private static final String DELETE_LIKE_QUERY = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
     private static final String ADD_FILM_GENRES_QUERY = "INSERT INTO films_genres (film_id, genre_id) VALUES(?, ?)";
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
-    private final MpaDbStorage mpaDbStorage;
 
     @Override
     public Collection<Film> findAll() {
@@ -104,7 +102,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopular(int count) {
-        String query = "SELECT f.id, f.name, f.mpa_id, m.name AS mpa_name, fg.genre_id, g.name AS genre_name FROM films f LEFT JOIN mpa m ON f.mpa_id = m.id LEFT JOIN films_genres fg ON fg.film_id = f.id LEFT JOIN genres g ON fg.genre_id = g.id";
         List<Film> films = jdbc.query(FIND_POPULAR_QUERY, mapper, count);
         return films;
     }
