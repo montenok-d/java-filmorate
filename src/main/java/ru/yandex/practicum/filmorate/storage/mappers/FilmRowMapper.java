@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Component
@@ -29,7 +29,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.findMpaById(rs.getInt("mpa_id")))
-                .genres(Set.copyOf(genreDbStorage.findGenresByFilmId(rs.getLong("id"))))
+                .genres(new HashSet<>(genreDbStorage.findGenresByFilmId(rs.getLong("id"))))
                 .build();
     }
 }
