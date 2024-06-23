@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,9 +17,9 @@ import java.sql.Statement;
 import java.util.*;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 @Slf4j
+@Qualifier("UserDbStorage")
 public class UserDbStorage implements UserStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";

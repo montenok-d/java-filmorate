@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,8 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
+@Qualifier("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
