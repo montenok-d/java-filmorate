@@ -64,7 +64,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public List<User> findAllFriends(@PathVariable("id") int id) {
-        log.info("PUT /{}/friends", id);
+        log.info("GET /{}/friends", id);
         return userService.findAllFriends(id);
     }
 

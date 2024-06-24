@@ -1,28 +1,44 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final MpaService mpaService;
+    private final GenreService genreService;
+
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, UserService userService, MpaService mpaService, GenreService genreService) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+        this.mpaService = mpaService;
+        this.genreService = genreService;
+    }
 
     public Collection<Film> findAll() {
+        log.info("filmStorage.findAll");
         return filmStorage.findAll();
     }
 
     public Film create(Film film) {
+        mpaService.checkMpaForFilm(film.getMpa().getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                genreService.checkGenreById(genre.getId());
+            }
+        }
         return filmStorage.create(film);
     }
 
@@ -42,25 +58,19 @@ public class FilmService {
     }
 
     public void addLike(long id, long userId) {
-        if (userService.findUserById(userId) == null) {
-            throw new EntityNotFoundException("User does not exist");
-        }
-        findFilmById(id).getLikes().add(userId);
+        findFilmById(id);
+        userService.findUserById(userId);
+        filmStorage.addLike(id, userId);
     }
 
     public void deleteLike(long id, long userId) {
-        Set<Long> likes = findFilmById(id).getLikes();
-        if (!likes.contains(userId)) {
-            throw new EntityNotFoundException(String.format("There wasn't like from user with id %d", userId));
-        }
-        likes.remove(userId);
+        findFilmById(id);
+        userService.findUserById(userId);
+        filmStorage.deleteLike(id, userId);
     }
 
     public List<Film> getPopular(int count) {
-        return filmStorage.findAll().stream()
-                .sorted((o1, o2) -> Integer.compare(o2.getLikes().size(),o1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopular(count);
     }
 
 }

@@ -27,5 +27,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private final Set<Long> likes = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
+    private Mpa mpa;
 }

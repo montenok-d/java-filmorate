@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -9,10 +9,13 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorage userStorage;
+
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     public Collection<User> findAll() {
         return userStorage.findAll();
@@ -40,33 +43,21 @@ public class UserService {
     public void addFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(id);
+        userStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(id);
+        userStorage.deleteFriend(id, friendId);
     }
 
     public List<User> findAllFriends(long id) {
         User user = findUserById(id);
-        List<User> friendsList = new ArrayList<>();
-        Set<Long> friendsIds = user.getFriends();
-        if (friendsIds != null) {
-            for (Long friend : friendsIds) {
-                friendsList.add(findUserById(friend));
-            }
-        }
-        return friendsList;
+        return userStorage.findAllFriends(id);
     }
 
     public List<User> findMutualFriends(long firstUser, long secondUser) {
-        List<User> firstUserFriends = findAllFriends(firstUser);
-        List<User> secondUserFriends = findAllFriends(secondUser);
-        firstUserFriends.retainAll(secondUserFriends);
-        return firstUserFriends;
+        return userStorage.findMutualFriends(firstUser, secondUser);
     }
 }
