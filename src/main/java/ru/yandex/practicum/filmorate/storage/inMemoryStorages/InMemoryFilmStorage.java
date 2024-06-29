@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.inMemoryStorages;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -52,7 +53,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getPopular(int count) {
+    public List<Film> getPopular(int count, Optional<Integer> genreId, Optional<Integer> year) {
         return null;
     }
 
