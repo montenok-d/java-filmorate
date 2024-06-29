@@ -15,10 +15,10 @@ import java.util.Set;
 @Builder
 public class User {
     private long id;
-    @NotNull
+    @NotNull(message = "email cannot be empty")
     @Email
     private String email;
-    @NotBlank
+    @NotBlank(message = "login cannot be empty")
     private String login;
     private String name;
     @PastOrPresent

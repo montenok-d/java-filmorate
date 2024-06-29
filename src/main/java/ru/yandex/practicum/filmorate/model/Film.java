@@ -17,13 +17,13 @@ import java.util.Set;
 @Builder
 public class Film {
     private long id;
-    @NotBlank
+    @NotBlank(message = "name cannot be empty")
     private String name;
     @Size(max = 200)
     private String description;
-    @NotNull
+    @NotNull(message = "release date cannot be empty")
     @DateTimeFormat
-    @ReleaseDate(value = "1895-12-28", message = "Введите дату релиза не ранее 28 декабря 1895 года.")
+    @ReleaseDate(value = "1895-12-28", message = "Release date should be after December 28, 1895.")
     private LocalDate releaseDate;
     @Positive
     private int duration;
