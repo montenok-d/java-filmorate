@@ -24,29 +24,22 @@ import java.util.Optional;
 @Qualifier("UserDbStorage")
 public class UserDbStorage implements UserStorage {
 
-    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
-    private static final String DELETE_BY_ID_QUERY = "DELETE FROM users WHERE id = ?";
-    private static final String UPDATE_BY_ID_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? where id = ?";
-    private static final String INSERT_NEW_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES(?, ?, ?, ?)";
-    private static final String FIND_FRIENDS_QUERY = "SELECT * FROM users u JOIN FRIENDS f ON u.ID = f.FRIEND_ID WHERE f.USER_ID = ? UNION SELECT * FROM users u JOIN FRIENDS f2 ON u.ID = f2.user_id WHERE f2.friend_id = ? AND STATUS = TRUE ";
-    private static final String ADD_FRIENDS_QUERY = "INSERT into friends (user_id, friend_id, status) VALUES(?, ?, FALSE)";
-    private static final String DELETE_FRIEND_QUERY = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
 
     @Override
     public Collection<User> findAll() {
-        return jdbc.query(FIND_ALL_QUERY, mapper);
+        String query = "SELECT * FROM users";
+        return jdbc.query(query, mapper);
     }
 
     @Override
     public User create(User user) {
+        String query = "INSERT INTO users (email, login, name, birthday) VALUES(?, ?, ?, ?)";
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection
-                    .prepareStatement(INSERT_NEW_QUERY, Statement.RETURN_GENERATED_KEYS);
+                    .prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             ps.setString(3, user.getName());
@@ -59,7 +52,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        int rowsUpdated = jdbc.update(UPDATE_BY_ID_QUERY, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
+        String query = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? where id = ?";
+        int rowsUpdated = jdbc.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         if (rowsUpdated > 0) {
             log.info("Данные User с Id {} обновлены.", user.getId());
         } else {
@@ -70,7 +64,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void delete(long id) {
-        int rowsDeleted = jdbc.update(DELETE_BY_ID_QUERY, id);
+        String query = "DELETE FROM users WHERE id = ?";
+        int rowsDeleted = jdbc.update(query, id);
         if (rowsDeleted > 0) {
             log.info("User с Id {} удалён.", id);
         } else {
@@ -80,8 +75,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Optional<User> findUserById(long id) {
+        String query = "SELECT * FROM users WHERE id = ?";
         try {
-            User result = jdbc.queryForObject(FIND_BY_ID_QUERY, mapper, id);
+            User result = jdbc.queryForObject(query, mapper, id);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();
@@ -90,25 +86,36 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(long userId, long friendId) {
-        jdbc.update(ADD_FRIENDS_QUERY, userId, friendId);
+        String query = "INSERT into friends (user_id, friend_id, status) VALUES(?, ?, FALSE)";
+        jdbc.update(query, userId, friendId);
     }
 
     @Override
     public void deleteFriend(long id, long friendId) {
-        jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
+        String query = "DELETE FROM friends " +
+                "WHERE user_id = ? AND friend_id = ?";
+        jdbc.update(query, id, friendId);
     }
 
     @Override
     public List<User> findMutualFriends(long firstUserId, long secondUserId) {
-        List<User> firstUserFriends = findAllFriends(firstUserId);
-        List<User> secondUserFriends = findAllFriends(secondUserId);
-        firstUserFriends.retainAll(secondUserFriends);
-        return firstUserFriends;
+        String query = "SELECT u.id, u.email, u.login, u.name, u.birthday " +
+                "FROM users AS u " +
+                "INNER JOIN friends f1 ON u.id = f1.friend_id " +
+                "INNER JOIN friends f2 ON f1.friend_id = f2.friend_id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?;";
+        return jdbc.query(query, mapper, firstUserId, secondUserId);
     }
 
     @Override
     public List<User> findAllFriends(long id) {
-        return jdbc.query(FIND_FRIENDS_QUERY, mapper, id, id);
+        String query = "SELECT * FROM users u " +
+                "JOIN FRIENDS f ON u.ID = f.FRIEND_ID " +
+                "WHERE f.USER_ID = ? " +
+                "UNION SELECT * FROM users u " +
+                "JOIN FRIENDS f2 ON u.ID = f2.user_id " +
+                "WHERE f2.friend_id = ? AND STATUS = TRUE ";
+        return jdbc.query(query, mapper, id, id);
     }
 
 }

@@ -16,7 +16,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleFilmNotFoundException(final EntityNotFoundException e) {
+    public ErrorResponse handleEntityNotFoundException(final EntityNotFoundException e) {
         log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
