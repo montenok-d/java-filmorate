@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.inMemoryStorages;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
