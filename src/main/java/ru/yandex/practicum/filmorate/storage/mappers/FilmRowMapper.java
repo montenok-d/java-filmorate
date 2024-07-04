@@ -3,14 +3,18 @@ package ru.yandex.practicum.filmorate.storage.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -18,10 +22,16 @@ import java.util.Set;
 public class FilmRowMapper implements RowMapper<Film> {
 
     private final GenreDbStorage genreDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         Set<Genre> genres = new HashSet<>(genreDbStorage.findGenresByFilmId(rs.getLong("id")));
+        Set<Director> directorSet = null;
+        List<Director> directors = directorDbStorage.findDirectorsByFilmId(rs.getLong("id"));
+        if (!CollectionUtils.isEmpty(directors)) {
+            directorSet = new HashSet<>(directors);
+        }
         return Film.builder()
                 .id(rs.getLong("id"))
                 .name(rs.getString("name"))
@@ -33,6 +43,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                         .name(rs.getString("mpa_name"))
                         .build())
                 .genres(genres)
+                .directors(directorSet)
                 .build();
     }
 }
