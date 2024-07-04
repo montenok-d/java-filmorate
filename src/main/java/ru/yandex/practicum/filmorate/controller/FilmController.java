@@ -75,4 +75,10 @@ public class FilmController {
         log.info("GET /films/director/ {}", directorId);
         return filmService.getDirectorFilms(sortBy, directorId);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilms(@RequestParam String sortBy, @PathVariable ("directorId") Long directorId) {
+        log.info("GET /films/director/ {}", directorId);
+        return filmService.getDirectorFilms(sortBy, directorId);
+    }
 }

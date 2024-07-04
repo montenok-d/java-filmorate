@@ -158,6 +158,33 @@ public class FilmDbStorage implements FilmStorage {
         return jdbc.query(sql, mapper, directorId);
     }
 
+    @Override
+    public List<Film> getDirectorFilmsByYear(Long directorId) {
+        String sql = "SELECT DISTINCT ON(FILMS.ID) FILMS.*, MPA.name AS mpa_name " +
+                "FROM FILMS " +
+                "LEFT JOIN FILMS_DIRECTORS FD ON FILMS.ID = FD.FILM_ID " +
+                "LEFT JOIN DIRECTORS D ON D.ID = FD.DIRECTOR_ID " +
+                "INNER JOIN MPA ON FILMS.MPA_ID = MPA.ID " +
+                "LEFT JOIN LIKES ON FILMS.ID = LIKES.FILM_ID " +
+                "WHERE D.ID = ? " +
+                "ORDER BY FILMS.RELEASE_DATE ";
+        return jdbc.query(sql, mapper, directorId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilmsByLikes(Long directorId) {
+        String sql = "SELECT DISTINCT ON(FILMS.ID) FILMS.*, MPA.name AS mpa_name, count(LIKES.FILM_ID) as CNT " +
+                "FROM FILMS " +
+                "LEFT JOIN FILMS_DIRECTORS FD ON FILMS.ID = FD.FILM_ID " +
+                "LEFT JOIN DIRECTORS D ON D.ID = FD.DIRECTOR_ID " +
+                "INNER JOIN MPA ON FILMS.MPA_ID = MPA.ID " +
+                "LEFT JOIN LIKES ON FILMS.ID = LIKES.FILM_ID " +
+                "WHERE D.ID = ? " +
+                "GROUP BY FILMS.ID " +
+                "ORDER BY CNT DESC ";
+        return jdbc.query(sql, mapper, directorId);
+    }
+
     private void updateGenres(Film film) {
         if (film.getGenres() != null) {
             String sql = "INSERT INTO films_genres (film_id, genre_id) VALUES(?, ?)";
