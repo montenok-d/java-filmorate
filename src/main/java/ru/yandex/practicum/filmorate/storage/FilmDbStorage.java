@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
@@ -28,11 +29,13 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         String query = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-                "f.mpa_id, m.name AS mpa_name, fg.genre_id, g.name AS genre_name " +
+                "f.mpa_id, m.name AS mpa_name, fg.genre_id, g.name AS genre_name, fd.director_id, d.name AS director_name  " +
                 "FROM films f " +
                 "LEFT JOIN mpa m ON f.mpa_id = m.id " +
                 "LEFT JOIN films_genres fg ON fg.film_id = f.id " +
-                "LEFT JOIN genres g ON fg.genre_id = g.id;";
+                "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
+                "LEFT JOIN directors d ON fd.director_id = d.id;";
         return jdbc.query(query, mapper);
     }
 
@@ -52,14 +55,16 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         updateGenres(film);
+        updateDirectors(film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
         String query = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? where id = ?";
-        jdbc.update(query, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
+        jdbc.update(query, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
         updateGenres(film);
+        updateDirectors(film);
         return film;
     }
 
@@ -110,6 +115,33 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Film> getDirectorFilmsByYear(Long directorId) {
+        String sql = "SELECT DISTINCT ON(FILMS.ID) FILMS.*, MPA.name AS mpa_name " +
+                "FROM FILMS " +
+                "LEFT JOIN FILMS_DIRECTORS FD ON FILMS.ID = FD.FILM_ID " +
+                "LEFT JOIN DIRECTORS D ON D.ID = FD.DIRECTOR_ID " +
+                "INNER JOIN MPA ON FILMS.MPA_ID = MPA.ID " +
+                "LEFT JOIN LIKES ON FILMS.ID = LIKES.FILM_ID " +
+                "WHERE D.ID = ? " +
+                "ORDER BY FILMS.RELEASE_DATE ";
+        return jdbc.query(sql, mapper, directorId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilmsByLikes(Long directorId) {
+        String sql = "SELECT DISTINCT ON(FILMS.ID) FILMS.*, MPA.name AS mpa_name, count(LIKES.FILM_ID) as CNT " +
+                "FROM FILMS " +
+                "LEFT JOIN FILMS_DIRECTORS FD ON FILMS.ID = FD.FILM_ID " +
+                "LEFT JOIN DIRECTORS D ON D.ID = FD.DIRECTOR_ID " +
+                "INNER JOIN MPA ON FILMS.MPA_ID = MPA.ID " +
+                "LEFT JOIN LIKES ON FILMS.ID = LIKES.FILM_ID " +
+                "WHERE D.ID = ? " +
+                "GROUP BY FILMS.ID " +
+                "ORDER BY CNT DESC ";
+        return jdbc.query(sql, mapper, directorId);
+    }
+
     private void updateGenres(Film film) {
         if (film.getGenres() != null) {
             String sql = "INSERT INTO films_genres (film_id, genre_id) VALUES(?, ?)";
@@ -124,6 +156,25 @@ public class FilmDbStorage implements FilmStorage {
                 @Override
                 public int getBatchSize() {
                     return film.getGenres().size();
+                }
+            });
+        }
+    }
+
+    private void updateDirectors(Film film) {
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            String sql = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
+            jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    List<Director> directors = new ArrayList<>(film.getDirectors());
+                    ps.setLong(1, film.getId());
+                    ps.setLong(2, directors.get(i).getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return film.getDirectors().size();
                 }
             });
         }
