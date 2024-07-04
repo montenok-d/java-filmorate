@@ -20,12 +20,14 @@ public class FilmService {
     private final UserService userService;
     private final MpaService mpaService;
     private final GenreService genreService;
+    private final DirectorService directorService;
 
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, UserService userService, MpaService mpaService, GenreService genreService) {
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, UserService userService, MpaService mpaService, GenreService genreService, DirectorService directorService) {
         this.filmStorage = filmStorage;
         this.userService = userService;
         this.mpaService = mpaService;
         this.genreService = genreService;
+        this.directorService = directorService;
     }
 
     public Collection<Film> findAll() {
@@ -40,6 +42,7 @@ public class FilmService {
                 genreService.checkGenreById(genre.getId());
             }
         }
+
         return filmStorage.create(film);
     }
 
@@ -74,4 +77,13 @@ public class FilmService {
         return filmStorage.getPopular(count, genreId, year);
     }
 
+    public List<Film> getDirectorFilms(String sortBy, Long id) {
+        if (sortBy.equalsIgnoreCase("year")) {
+            return filmStorage.getDirectorFilmsByYear(id);
+        }
+        if (sortBy.equalsIgnoreCase("likes")) {
+            return filmStorage.getDirectorFilmsByLikes(id);
+        }
+        throw new UnsupportedOperationException();
+    }
 }
