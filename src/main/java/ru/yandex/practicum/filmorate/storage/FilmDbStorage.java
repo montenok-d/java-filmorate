@@ -121,7 +121,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         query += "GROUP BY f.id " +
                 "ORDER BY count(l.user_id) desc " +
-                "LIMIT ?";
+                "LIMIT ? ";
         params.add(count);
         return jdbc.query(query, mapper, params.toArray());
     }
