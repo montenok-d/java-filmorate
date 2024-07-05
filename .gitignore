@@ -44,4 +44,3 @@ build/
 
 *.db
 db/*
-/src/main/resources/data.sql

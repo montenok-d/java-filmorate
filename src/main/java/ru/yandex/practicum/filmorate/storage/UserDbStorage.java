@@ -118,4 +118,9 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(query, mapper, id, id);
     }
 
+    @Override
+    public List<Long> getUsersFilmsIds(Long userId) {
+        String sql = "SELECT film_id FROM likes WHERE user_id = ?";
+        return jdbc.query(sql, (rs, rowNum) -> rs.getLong("film_id"), userId);
+    }
 }

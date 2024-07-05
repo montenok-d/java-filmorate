@@ -6,7 +6,8 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -59,5 +60,8 @@ public class UserService {
 
     public List<User> findMutualFriends(long firstUser, long secondUser) {
         return userStorage.findMutualFriends(firstUser, secondUser);
+    }
+    public List<Long> getUsersFilms(Long userId) {
+        return userStorage.getUsersFilmsIds(userId);
     }
 }
