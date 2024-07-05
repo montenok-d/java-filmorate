@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {MpaDbStorage.class, MpaRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(scripts = {"/films.sql"})
+@Sql(scripts = {"/data.sql"})
 public class MpaStorageDbTest {
     private final MpaDbStorage mpaDbStorage;
 

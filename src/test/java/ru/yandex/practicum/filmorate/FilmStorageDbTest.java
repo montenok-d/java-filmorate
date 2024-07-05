@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {FilmDbStorage.class, MpaDbStorage.class, FilmRowMapper.class, MpaRowMapper.class,
         GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(scripts = {"/films.sql"})
+@Sql(scripts = {"/data.sql"})
 class FilmStorageDbTest {
 
     private final FilmDbStorage filmDbStorage;
