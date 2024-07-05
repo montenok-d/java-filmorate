@@ -29,13 +29,9 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         String query = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-                "f.mpa_id, m.name AS mpa_name, fg.genre_id, g.name AS genre_name, fd.director_id, d.name AS director_name  " +
+                "f.mpa_id, m.name AS mpa_name " +
                 "FROM films f " +
-                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "LEFT JOIN films_genres fg ON fg.film_id = f.id " +
-                "LEFT JOIN genres g ON fg.genre_id = g.id " +
-                "LEFT JOIN films_directors fd ON fd.film_id = f.id " +
-                "LEFT JOIN directors d ON fd.director_id = d.id;";
+                "LEFT JOIN mpa m ON f.mpa_id = m.id ";
         return jdbc.query(query, mapper);
     }
 
@@ -56,22 +52,30 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         updateGenres(film);
         updateDirectors(film);
-        return film;
+        long id = keyHolder.getKey().longValue();
+        return findFilmById(id).get();
     }
 
     @Override
     public Film update(Film film) {
-        String query = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? where id = ?";
-        jdbc.update(query, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
+        String query = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? where id = ?";
+        jdbc.update(query, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        deleteGenres(film.getId());
         updateGenres(film);
         updateDirectors(film);
-        return film;
+        return findFilmById(film.getId()).get();
+    }
+
+    private void deleteGenres(long id) {
+        String query = "DELETE FROM films_genres WHERE film_id = ?";
+        jdbc.update(query, id);
     }
 
     @Override
     public void delete(long id) {
         String query = "DELETE FROM films WHERE id = ?";
         jdbc.update(query, id);
+        deleteGenres(id);
     }
 
     @Override
@@ -159,7 +163,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void updateGenres(Film film) {
-        if (film.getGenres() != null) {
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             String sql = "INSERT INTO films_genres (film_id, genre_id) VALUES(?, ?)";
             jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
                 @Override
