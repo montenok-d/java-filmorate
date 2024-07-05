@@ -68,6 +68,7 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
+
     public List<Long> getUsersFilms(Long userId) {
         return userStorage.getUsersFilmsIds(userId);
     }
