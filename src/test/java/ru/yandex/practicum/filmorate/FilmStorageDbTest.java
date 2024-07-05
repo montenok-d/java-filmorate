@@ -13,14 +13,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.MpaService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.mappers.*;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -34,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {FilmDbStorage.class, MpaDbStorage.class, FilmRowMapper.class, MpaRowMapper.class,
-        GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class})
+        GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class, DirectorDbStorage.class, DirectorRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/films.sql"})
 class FilmStorageDbTest {
