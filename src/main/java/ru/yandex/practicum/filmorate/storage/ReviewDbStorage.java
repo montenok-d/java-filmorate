@@ -42,9 +42,9 @@ public class ReviewDbStorage {
     }
 
     public Review update(Review review) {
-        String query = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, film_id = ?, useful = ? WHERE id = ?";
-        jdbc.update(query, review.getContent(), review.getIsPositive(), review.getUserId(), review.getFilmId(), review.getUseful(), review.getReviewId());
-        return review;
+        String query = "UPDATE reviews SET content = ?, is_positive = ?  WHERE id = ?";
+        jdbc.update(query, review.getContent(), review.getIsPositive(), review.getReviewId());
+        return findById(review.getReviewId()).get();
     }
 
     public Optional<Review> findById(long reviewId) {
