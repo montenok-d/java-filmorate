@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {GenreDbStorage.class, GenreRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(scripts = {"/films.sql"})
+@Sql(scripts = {"/data.sql"})
 public class GenreStorageDbTest {
     private final GenreDbStorage genreDbStorage;
 
