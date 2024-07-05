@@ -95,7 +95,6 @@ public class ReviewDbStorage {
         String sqlQuery = "SELECT SUM(CASE WHEN is_like = TRUE THEN 1 ELSE -1 END) useful FROM reviews_likes WHERE review_id = ?";
         Integer useful = jdbc.queryForObject(sqlQuery, Integer.class, reviewId);
         if (useful != null) {
-            System.out.println(useful);
             return useful;
         } else {
             return 0;
