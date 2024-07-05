@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
@@ -48,7 +46,7 @@ public class ReviewService {
     }
 
     public List<Review> getAll(Optional<Long> filmId, int count) {
-        if (!filmId.isEmpty()) {
+        if (filmId.isPresent()) {
             checkFilmExists(filmId.get());
             return reviewDbStorage.getAllByFilmId(filmId.get(), count);
         } else {
@@ -65,27 +63,23 @@ public class ReviewService {
         checkUserExists(userId);
         findById(reviewId);
         reviewDbStorage.addLike(reviewId, userId, true);
-        reviewDbStorage.increaseUseful(reviewId);
     }
 
     public void addDislike(long reviewId, long userId) {
         checkUserExists(userId);
         findById(reviewId);
         reviewDbStorage.addLike(reviewId, userId, false);
-        reviewDbStorage.decreaseUseful(reviewId);
     }
 
     public void deleteLike(long reviewId, long userId) {
         checkUserExists(userId);
         findById(reviewId);
         reviewDbStorage.deleteLike(reviewId, userId);
-        reviewDbStorage.decreaseUseful(reviewId);
     }
 
     public void deleteDislike(long reviewId, long userId) {
         checkUserExists(userId);
         findById(reviewId);
         reviewDbStorage.deleteLike(reviewId, userId);
-        reviewDbStorage.increaseUseful(reviewId);
     }
 }

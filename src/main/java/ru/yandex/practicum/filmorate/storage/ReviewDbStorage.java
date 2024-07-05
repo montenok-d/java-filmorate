@@ -37,7 +37,8 @@ public class ReviewDbStorage {
             return ps;
         }, keyHolder);
         review.setReviewId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        return review;
+        long id = keyHolder.getKey().longValue();
+        return findById(id).get();
     }
 
     public Review update(Review review) {
@@ -57,13 +58,13 @@ public class ReviewDbStorage {
     }
 
     public List<Review> getAll(int count) {
-        String query = "SELECT * FROM reviews LIMIT ?";
+        String query = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?";
         return jdbc.query(query, mapper, count);
     }
 
     public List<Review> getAllByFilmId(long filmId, int count) {
         log.debug("filmId, count {} {}", filmId, count);
-        String query = "SELECT * FROM reviews WHERE film_id = ? LIMIT ?";
+        String query = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
         return jdbc.query(query, mapper, filmId, count);
     }
 
@@ -73,22 +74,31 @@ public class ReviewDbStorage {
     }
 
     public void addLike(long reviewId, long userId, boolean isLike) {
-        String query = "INSERT INTO reviews_likes (user_id, review_id, is_like) VALUES (?, ?, ?)";
-        jdbc.update(query, reviewId, userId, isLike);
+        String query = "MERGE into reviews_likes(user_id, review_id, is_like) VALUES (?, ?, ?)";
+        jdbc.update(query, userId, reviewId, isLike);
+        updateUseful(reviewId);
     }
 
     public void deleteLike(long reviewId, long userId) {
         String query = "DELETE FROM reviews_likes WHERE user_id = ? AND review_id = ?";
-        jdbc.update(query, reviewId, userId);
+        jdbc.update(query, userId, reviewId);
+        updateUseful(reviewId);
     }
 
-    public void increaseUseful(long reviewId) {
-        String query = "UPDATE reviews SET useful = useful + 1 WHERE id = ?";
-        jdbc.update(query, reviewId);
+    private void updateUseful(long reviewId) {
+        int useful = getUseful(reviewId);
+        String sqlQuery = "UPDATE reviews SET useful = ? WHERE id = ?";
+        jdbc.update(sqlQuery, useful, reviewId);
     }
 
-    public void decreaseUseful(long reviewId) {
-        String query = "UPDATE reviews SET useful = useful - 1 WHERE id = ?";
-        jdbc.update(query, reviewId);
+    private int getUseful(long reviewId) {
+        String sqlQuery = "SELECT SUM(CASE WHEN is_like = TRUE THEN 1 ELSE -1 END) useful FROM reviews_likes WHERE review_id = ?";
+        Integer useful = jdbc.queryForObject(sqlQuery, Integer.class, reviewId);
+        if (useful != null) {
+            System.out.println(useful);
+            return useful;
+        } else {
+            return 0;
+        }
     }
 }

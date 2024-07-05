@@ -26,13 +26,13 @@ create TABLE IF NOT EXISTS films (
 );
 
 create TABLE IF NOT EXISTS likes (
-    user_id BIGINT NOT NULL REFERENCES users (id),
-    film_id BIGINT NOT NULL REFERENCES films (id)
+    user_id BIGINT NOT NULL REFERENCES users (id) ON delete CASCADE,
+    film_id BIGINT NOT NULL REFERENCES films (id) ON delete CASCADE
 );
 
 create TABLE IF NOT EXISTS friends (
-    user_id BIGINT NOT NULL REFERENCES users (id),
-    friend_id BIGINT NOT NULL REFERENCES users (id),
+    user_id BIGINT NOT NULL REFERENCES users (id) ON delete CASCADE,
+    friend_id BIGINT NOT NULL REFERENCES users (id) ON delete CASCADE,
     status boolean NOT NULL DEFAULT FALSE,
     PRIMARY KEY (user_id, friend_id)
 );
@@ -52,8 +52,8 @@ create TABLE IF NOT EXISTS reviews (
 );
 
 create TABLE IF NOT EXISTS reviews_likes (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    review_id BIGINT NOT NULL,
-    is_like boolean NOT NULL DEFAULT FALSE
+    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    review_id BIGINT NOT NULL REFERENCES reviews (id) ON DELETE CASCADE,
+    is_like boolean NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (user_id, review_id)
 );
