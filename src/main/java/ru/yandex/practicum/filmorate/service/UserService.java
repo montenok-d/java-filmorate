@@ -23,6 +23,7 @@ public class UserService {
     }
 
     public User create(User user) {
+        validateName(user);
         return userStorage.create(user);
     }
 
@@ -60,6 +61,12 @@ public class UserService {
 
     public List<User> findMutualFriends(long firstUser, long secondUser) {
         return userStorage.findMutualFriends(firstUser, secondUser);
+    }
+
+    private void validateName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
     public List<Long> getUsersFilms(Long userId) {
         return userStorage.getUsersFilmsIds(userId);
