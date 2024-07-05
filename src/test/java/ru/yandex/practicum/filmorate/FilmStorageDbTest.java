@@ -124,7 +124,7 @@ class FilmStorageDbTest {
         filmDbStorage.create(film);
         userDbStorage.create(user);
         filmDbStorage.addLike(film.getId(), user.getId());
-        List<Film> popularFilms = filmDbStorage.getPopular(10);
+        List<Film> popularFilms = filmDbStorage.getPopular(10, Optional.empty(), Optional.empty());
         Assertions.assertThat(popularFilms).isNotEmpty().isNotNull().doesNotHaveDuplicates();
         Assertions.assertThat(popularFilms).extracting("description").contains(film.getDescription());
         Assertions.assertThat(popularFilms).extracting("name").contains(film.getName());
