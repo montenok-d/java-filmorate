@@ -199,4 +199,15 @@ public class FilmDbStorage implements FilmStorage {
             });
         }
     }
+
+    @Override
+    public List<Film> getCommonFilms(int id, int friendId) {
+        String sql = "SELECT * FROM (SELECT f.*, count(fl.film_id) likes, m.name AS mpa_name FROM films f " +
+                "LEFT JOIN likes fl on f.id = fl.film_id " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "GROUP BY f.id) f, likes l1, likes l2 " +
+                "WHERE f.id = l1.film_id AND f.id = l2.film_id AND l1.user_id = ? AND l2.user_id = ? " +
+                "ORDER BY likes DESC";
+        return jdbc.query(sql, mapper, id, friendId);
+    }
 }
