@@ -86,4 +86,9 @@ public class FilmService {
         }
         throw new UnsupportedOperationException();
     }
+
+    public List<Film> getCommonFilms(int id, int friendId) {
+        return filmStorage.getCommonFilms(id, friendId);
+    }
+
 }
