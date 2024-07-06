@@ -27,7 +27,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
     private final FeedRowMapper feedRowMapper;
-    private final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public Collection<User> findAll() {

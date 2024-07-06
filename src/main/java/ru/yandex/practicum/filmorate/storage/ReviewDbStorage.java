@@ -24,7 +24,7 @@ public class ReviewDbStorage {
 
     private final JdbcTemplate jdbc;
     private final ReviewRowMapper mapper;
-    private final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     public Review create(Review review) {
         String query = "INSERT INTO reviews (content, is_positive, user_id, film_id) VALUES (?, ?, ?, ?);";

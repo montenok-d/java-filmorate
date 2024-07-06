@@ -26,7 +26,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
-    private final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public Collection<Film> findAll() {
