@@ -58,7 +58,6 @@ public class ReviewService {
         findById(id);
         reviewDbStorage.delete(id);
     }
-
     public void addLike(long reviewId, long userId) {
         checkUserExists(userId);
         findById(reviewId);
