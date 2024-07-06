@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public class FilmRowMapper implements RowMapper<Film> {
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Set<Genre> genres = new HashSet<>(genreDbStorage.findGenresByFilmId(rs.getLong("id")));
+        Set<Genre> genres = new LinkedHashSet<>(genreDbStorage.findGenresByFilmId(rs.getLong("id")));
         Set<Director> directorSet = null;
         List<Director> directors = directorDbStorage.findDirectorsByFilmId(rs.getLong("id"));
         if (!CollectionUtils.isEmpty(directors)) {
