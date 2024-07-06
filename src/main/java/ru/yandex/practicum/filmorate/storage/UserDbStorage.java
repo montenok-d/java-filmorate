@@ -7,16 +7,16 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.mappers.FeedRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.Instant;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,6 +26,8 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
+    private final FeedRowMapper feedRowMapper;
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public Collection<User> findAll() {
@@ -88,6 +90,7 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(long userId, long friendId) {
         String query = "INSERT into friends (user_id, friend_id, status) VALUES(?, ?, FALSE)";
         jdbc.update(query, userId, friendId);
+        jdbc.update(ADD_FEED, friendId, Instant.now().toEpochMilli(), userId, "FRIEND", "ADD");
     }
 
     @Override
@@ -95,6 +98,7 @@ public class UserDbStorage implements UserStorage {
         String query = "DELETE FROM friends " +
                 "WHERE user_id = ? AND friend_id = ?";
         jdbc.update(query, id, friendId);
+        jdbc.update(ADD_FEED, friendId, Instant.now().toEpochMilli(), id, "FRIEND", "REMOVE");
     }
 
     @Override
@@ -122,5 +126,11 @@ public class UserDbStorage implements UserStorage {
     public List<Long> getUsersFilmsIds(Long userId) {
         String sql = "SELECT film_id FROM likes WHERE user_id = ?";
         return jdbc.query(sql, (rs, rowNum) -> rs.getLong("film_id"), userId);
+    }
+
+    @Override
+    public List<Feed> getFeedByUserId(Long userId) {
+        String query = "SELECT * FROM feed WHERE user_id = ?";
+        return jdbc.query(query, feedRowMapper, userId);
     }
 }

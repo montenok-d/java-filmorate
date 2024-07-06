@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.ReviewRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class ReviewDbStorage {
 
     private final JdbcTemplate jdbc;
     private final ReviewRowMapper mapper;
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     public Review create(Review review) {
         String query = "INSERT INTO reviews (content, is_positive, user_id, film_id) VALUES (?, ?, ?, ?);";
@@ -38,12 +40,15 @@ public class ReviewDbStorage {
         }, keyHolder);
         review.setReviewId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         long id = keyHolder.getKey().longValue();
+        jdbc.update(ADD_FEED,  review.getReviewId(), Instant.now().toEpochMilli(), review.getUserId(), "REVIEW", "ADD");
         return findById(id).get();
     }
 
     public Review update(Review review) {
         String query = "UPDATE reviews SET content = ?, is_positive = ?  WHERE id = ?";
         jdbc.update(query, review.getContent(), review.getIsPositive(), review.getReviewId());
+        Optional<Review> reviewOptional = findById(review.getReviewId());
+        reviewOptional.ifPresent(value -> jdbc.update(ADD_FEED, review.getReviewId(), Instant.now().toEpochMilli(), value.getUserId(), "REVIEW", "UPDATE"));
         return findById(review.getReviewId()).get();
     }
 
@@ -70,6 +75,8 @@ public class ReviewDbStorage {
 
     public void delete(long id) {
         String query = "DELETE FROM reviews WHERE id = ?";
+        Optional<Review> reviewOptional = findById(id);
+        reviewOptional.ifPresent(review -> jdbc.update(ADD_FEED, id, Instant.now().toEpochMilli(), review.getUserId(), "REVIEW", "REMOVE"));
         jdbc.update(query, id);
     }
 

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.inMemoryStorages;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -64,6 +65,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<Long> getUsersFilmsIds(Long userId) {
+        return null;
+    }
+
+    @Override
+    public List<Feed> getFeedByUserId(Long userId) {
         return null;
     }
 

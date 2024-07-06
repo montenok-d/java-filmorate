@@ -16,6 +16,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.*;
 
 @Repository
@@ -25,6 +26,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public Collection<Film> findAll() {
@@ -97,12 +99,14 @@ public class FilmDbStorage implements FilmStorage {
     public void addLike(long filmId, long userId) {
         String query = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
         jdbc.update(query, filmId, userId);
+        jdbc.update(ADD_FEED, filmId, Instant.now().toEpochMilli(), userId, "LIKE", "ADD");
     }
 
     @Override
     public void deleteLike(long filmId, long userId) {
         String query = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
         jdbc.update(query, filmId, userId);
+        jdbc.update(ADD_FEED, filmId, Instant.now().toEpochMilli(), userId, "LIKE", "REMOVE");
     }
 
     @Override
