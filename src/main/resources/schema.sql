@@ -69,3 +69,13 @@ create TABLE IF NOT EXISTS films_directors
 film_id     BIGINT REFERENCES films (id) ON delete CASCADE,
 director_id BIGINT NOT NULL REFERENCES directors (id) ON delete RESTRICT
 );
+
+create TABLE IF NOT EXISTS feed
+(
+id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+entity_id BIGINT NOT NULL,
+timestamp BIGINT NOT NULL,
+user_id BIGINT NOT NULL,
+event_type VARCHAR(30) NOT NULL,
+operation VARCHAR(30) NOT NULL
+);

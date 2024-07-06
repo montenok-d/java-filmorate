@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.RecommendationService;
@@ -83,5 +84,11 @@ public class UserController {
     public Set<Film> findRecommendations(@PathVariable("id") long id) {
         log.info("GET /{}/recommendations", id);
         return recommendationService.findRecommendations(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Feed> getFeed(@PathVariable("id") long id) {
+        log.info("GET /{}/feed", id);
+        return userService.getFeedByUserId(id);
     }
 }

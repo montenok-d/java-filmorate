@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -71,5 +74,9 @@ public class UserService {
 
     public List<Long> getUsersFilms(Long userId) {
         return userStorage.getUsersFilmsIds(userId);
+    }
+
+    public List<Feed> getFeedByUserId(Long userId) {
+        return userStorage.getFeedByUserId(userId).stream().sorted(Comparator.comparing(Feed::getTimestamp)).toList();
     }
 }
