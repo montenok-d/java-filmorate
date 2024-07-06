@@ -37,9 +37,7 @@ public class DirectorService {
         directorStorage.delete(id);
     }
 
-    public void isDirectorExist(long id) {
-        if (!directorStorage.isDirectorExist(id)) {
-            throw new EntityNotFoundException((String.format("Director № %d not found", id)));
-        }
+    public boolean isDirectorExist(long id) {
+        return directorStorage.isDirectorExist(id);
     }
 }

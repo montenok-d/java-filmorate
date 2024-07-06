@@ -7,10 +7,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -49,15 +53,22 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director update(Director director) {
+        if (!isDirectorExist(director.getId())) {
+            throw new EntityNotFoundException(String.format("Director with id=%d not found", director.getId()));
+        }
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
         jdbc.update(sql, director.getName(), director.getId());
+
         return director;
     }
 
     @Override
     public void delete(long directorId) {
-        String sql = "DELETE FROM directors WHERE id = ?";
-        jdbc.update(sql, directorId);
+        String deleteFilmDirectorsSql = "DELETE FROM films_directors WHERE director_id = ?";
+        jdbc.update(deleteFilmDirectorsSql, directorId);
+
+        String deleteDirectorSql = "DELETE FROM directors WHERE id = ?";
+        jdbc.update(deleteDirectorSql, directorId);
     }
 
     @Override
