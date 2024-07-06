@@ -28,7 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {FilmDbStorage.class, MpaDbStorage.class, FilmRowMapper.class, MpaRowMapper.class,
-        GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class, DirectorDbStorage.class, DirectorRowMapper.class})
+        GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class,
+        DirectorDbStorage.class, DirectorRowMapper.class, FeedRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/films.sql"})
 class FilmStorageDbTest {
