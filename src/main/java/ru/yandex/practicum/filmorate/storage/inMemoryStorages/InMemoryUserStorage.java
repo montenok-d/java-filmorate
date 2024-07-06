@@ -69,7 +69,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Feed> getFeedByUserId(Long userId){
+    public List<Feed> getFeedByUserId(Long userId) {
         return null;
     }
 
