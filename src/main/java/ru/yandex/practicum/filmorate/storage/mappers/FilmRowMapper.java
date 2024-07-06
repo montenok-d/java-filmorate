@@ -28,11 +28,13 @@ public class FilmRowMapper implements RowMapper<Film> {
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         Set<Genre> genres = new LinkedHashSet<>(genreDbStorage.findGenresByFilmId(rs.getLong("id")));
-        Set<Director> directorSet = null;
+        Set<Director> directorSet = new HashSet<>();
         List<Director> directors = directorDbStorage.findDirectorsByFilmId(rs.getLong("id"));
+
         if (!CollectionUtils.isEmpty(directors)) {
-            directorSet = new HashSet<>(directors);
+            directorSet.addAll(directors);
         }
+
         return Film.builder()
                 .id(rs.getLong("id"))
                 .name(rs.getString("name"))

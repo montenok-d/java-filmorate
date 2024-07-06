@@ -4,8 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class FilmController {
 
     private final FilmService filmService;
+    private final DirectorService directorService;
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -71,9 +75,16 @@ public class FilmController {
     }
 
     @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilms(@RequestParam String sortBy, @PathVariable ("directorId") Long directorId) {
-        log.info("GET /films/director/ {}", directorId);
-        return filmService.getDirectorFilms(sortBy, directorId);
+    public ResponseEntity<List<Film>> getDirectorFilms(@RequestParam String sortBy, @PathVariable("directorId") Long directorId) {
+        try {
+            if (!directorService.isDirectorExist(directorId)) {
+                return ResponseEntity.notFound().build();
+            }
+            List<Film> films = filmService.getDirectorFilms(sortBy, directorId);
+            return ResponseEntity.ok(films);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/common")

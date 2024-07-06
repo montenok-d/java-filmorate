@@ -63,6 +63,7 @@ public class FilmDbStorage implements FilmStorage {
         String query = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? where id = ?";
         jdbc.update(query, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
         deleteGenres(film.getId());
+        deleteDirectors(film.getId());
         updateGenres(film);
         updateDirectors(film);
         return findFilmById(film.getId()).get();
@@ -71,6 +72,11 @@ public class FilmDbStorage implements FilmStorage {
     private void deleteGenres(long id) {
         String query = "DELETE FROM films_genres WHERE film_id = ?";
         jdbc.update(query, id);
+    }
+
+    private void deleteDirectors(long id) {
+        String deleteSql = "DELETE FROM films_directors WHERE film_id = ?";
+        jdbc.update(deleteSql, id);
     }
 
     @Override
