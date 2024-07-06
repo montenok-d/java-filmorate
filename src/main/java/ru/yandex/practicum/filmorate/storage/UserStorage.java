@@ -25,4 +25,6 @@ public interface UserStorage {
 
     public List<User> findMutualFriends(long firstUser, long secondUser);
 
+    public List<Long> getUsersFilmsIds(Long userId);
+
 }

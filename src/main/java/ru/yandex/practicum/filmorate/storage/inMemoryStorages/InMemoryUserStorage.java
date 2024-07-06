@@ -62,6 +62,11 @@ public class InMemoryUserStorage implements UserStorage {
         return null;
     }
 
+    @Override
+    public List<Long> getUsersFilmsIds(Long userId) {
+        return null;
+    }
+
     private long getNextId() {
         long currentMaxId = users.keySet()
                 .stream()
