@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Qualifier("InMemoryFilmStorage")
@@ -69,6 +70,23 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(int id, int friendId) {
         return null;
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String lowerCaseQuery = query.toLowerCase();
+        return films.values().stream()
+                .filter(film -> film.getName().toLowerCase().contains(lowerCaseQuery))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String lowerCaseQuery = query.toLowerCase();
+        return films.values().stream()
+                .filter(film -> film.getDirectors().stream()
+                        .anyMatch(director -> director.getName().toLowerCase().contains(lowerCaseQuery)))
+                .collect(Collectors.toList());
     }
 
     private long getNextId() {

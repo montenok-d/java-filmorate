@@ -220,4 +220,25 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY likes DESC";
         return jdbc.query(sql, mapper, id, friendId);
     }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "WHERE LOWER(f.name) LIKE LOWER(?)";
+        return jdbc.query(sql, mapper, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "LEFT JOIN films_directors fd ON f.id = fd.film_id " +
+                "LEFT JOIN directors d ON fd.director_id = d.id " +
+                "WHERE LOWER(d.name) LIKE LOWER(?)";
+        return jdbc.query(sql, mapper, "%" + query + "%");
+    }
+
 }

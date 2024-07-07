@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -91,4 +89,24 @@ public class FilmService {
         return filmStorage.getCommonFilms(id, friendId);
     }
 
+    public List<Film> searchFilms(String query, String by) {
+        String[] searchCriteria = by.toLowerCase().split(",");
+        Set<String> criteriaSet = new HashSet<>(Arrays.asList(searchCriteria));
+
+        List<Film> filmsByTitle = new ArrayList<>();
+        List<Film> filmsByDirector = new ArrayList<>();
+
+        if (criteriaSet.contains("title")) {
+            filmsByTitle = filmStorage.searchByTitle(query);
+        }
+
+        if (criteriaSet.contains("director")) {
+            filmsByDirector = filmStorage.searchByDirector(query);
+        }
+
+        Set<Film> combinedFilms = new LinkedHashSet<>(filmsByTitle);
+        combinedFilms.addAll(filmsByDirector);
+
+        return new ArrayList<>(combinedFilms);
+    }
 }
