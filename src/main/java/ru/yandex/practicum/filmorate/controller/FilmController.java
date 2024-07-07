@@ -94,6 +94,7 @@ public class FilmController {
         log.info("GET /common userId={} friendId={}", id, friendId);
         return filmService.getCommonFilms(id, friendId);
     }
+
     @GetMapping("/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
         log.info("GET /films/search?query={}&by={}", query, by);
