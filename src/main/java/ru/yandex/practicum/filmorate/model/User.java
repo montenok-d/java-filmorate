@@ -14,7 +14,8 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    private long id;
+
+    private Long id;
     @NotNull(message = "email cannot be empty")
     @Email
     private String email;

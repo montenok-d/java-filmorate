@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.Collection;
 
@@ -22,22 +22,18 @@ public class DirectorService {
         return directorStorage.findAll();
     }
 
-    public Director findById(long id) {
+    public Director findById(Long id) {
         return directorStorage.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Director № %d not found", id)));
     }
 
     public Director update(Director director) {
-        isDirectorExist(director.getId());
+        findById(director.getId());
         return directorStorage.update(director);
     }
 
-    public void delete(long id) {
-        isDirectorExist(id);
+    public void delete(Long id) {
+        findById(id);
         directorStorage.delete(id);
-    }
-
-    public boolean isDirectorExist(long id) {
-        return directorStorage.isDirectorExist(id);
     }
 }

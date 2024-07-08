@@ -15,7 +15,7 @@ public class RecommendationService {
     private final UserService userService;
     private final FilmService filmService;
 
-    public Set<Film> findRecommendations(long userId) {
+    public Set<Film> findRecommendations(Long userId) {
         Map<Long, List<Long>> usersFilms = new HashMap<>();
         Collection<User> allUsers = userService.findAll();
         for (User user : allUsers) {
@@ -39,7 +39,7 @@ public class RecommendationService {
         } else {
             return userService.getUsersFilms(mostCloseUser).stream()
                     .filter(filmId -> !usersFilms.get(userId).contains(filmId))
-                    .map(filmService::findFilmById)
+                    .map(filmService::findById)
                     .collect(Collectors.toSet());
         }
     }

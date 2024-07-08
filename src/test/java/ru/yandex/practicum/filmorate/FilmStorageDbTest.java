@@ -9,12 +9,17 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.mapper.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.MpaService;
-import ru.yandex.practicum.filmorate.storage.*;
-import ru.yandex.practicum.filmorate.storage.mappers.*;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -29,22 +34,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {FilmDbStorage.class, MpaDbStorage.class, FilmRowMapper.class, MpaRowMapper.class,
         GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class,
-        DirectorDbStorage.class, DirectorRowMapper.class, FeedRowMapper.class})
+        DirectorDbStorage.class, DirectorRowMapper.class, FeedRowMapper.class, LikeDbStorage.class, LikeRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/films.sql"})
 class FilmStorageDbTest {
 
     private final FilmDbStorage filmDbStorage;
     private final MpaDbStorage mpaDbStorage;
+    private final LikeDbStorage likeDbStorage;
     private final UserDbStorage userDbStorage;
 
     @Test
     void getFilmByIdTest() {
-        Mpa mpa = mpaDbStorage.findMpaById(1L).get();
+        Mpa mpa = mpaDbStorage.findById(1L).get();
         Film film = newFilm("Film", "description", LocalDate.of(1998, 2, 23), 120, mpa);
         filmDbStorage.create(film);
         long filmId = film.getId();
-        Optional<Film> filmFromDb = filmDbStorage.findFilmById(filmId);
+        Optional<Film> filmFromDb = filmDbStorage.findById(filmId);
         Assertions.assertThat(filmFromDb)
                 .isPresent()
                 .hasValueSatisfying(f ->
@@ -61,7 +67,7 @@ class FilmStorageDbTest {
 
     @Test
     void updateFilmTest() {
-        Mpa mpa = mpaDbStorage.findMpaById(1L).get();
+        Mpa mpa = mpaDbStorage.findById(1L).get();
         Film film = newFilm("Film", "description", LocalDate.of(1998, 2, 23), 120, mpa);
         filmDbStorage.create(film);
         long filmId = film.getId();
@@ -74,7 +80,7 @@ class FilmStorageDbTest {
                 .mpa(mpa)
                 .build();
         filmDbStorage.update(newFilm);
-        Optional<Film> updatedFilm = filmDbStorage.findFilmById(filmId);
+        Optional<Film> updatedFilm = filmDbStorage.findById(filmId);
         Assertions.assertThat(updatedFilm)
                 .isPresent()
                 .hasValueSatisfying(f ->
@@ -91,7 +97,7 @@ class FilmStorageDbTest {
 
     @Test
     void findAllFilmsTest() {
-        Mpa mpa = mpaDbStorage.findMpaById(1L).get();
+        Mpa mpa = mpaDbStorage.findById(1L).get();
         Film film = newFilm("Film", "description", LocalDate.of(1998, 2, 23), 120, mpa);
         filmDbStorage.create(film);
         Collection<Film> allFilms = filmDbStorage.findAll();
@@ -103,7 +109,7 @@ class FilmStorageDbTest {
 
     @Test
     void deleteFilmTest() {
-        Mpa mpa = mpaDbStorage.findMpaById(1L).get();
+        Mpa mpa = mpaDbStorage.findById(1L).get();
         Film film = newFilm("Film", "description", LocalDate.of(1998, 2, 23), 120, mpa);
         filmDbStorage.create(film);
         int allFilmsSize = filmDbStorage.findAll().size();
@@ -120,7 +126,7 @@ class FilmStorageDbTest {
                 .name("New name")
                 .birthday(LocalDate.of(1999, 12, 1))
                 .build();
-        Mpa mpa = mpaDbStorage.findMpaById(1L).get();
+        Mpa mpa = mpaDbStorage.findById(1L).get();
         Film film = newFilm("Best film", "description", LocalDate.of(1998, 2, 23), 120, mpa);
         filmDbStorage.create(film);
         userDbStorage.create(user);

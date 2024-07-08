@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.director;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,9 +7,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.mapper.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +29,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Optional<Director> findById(long id) {
+    public Optional<Director> findById(Long id) {
         try {
             Director result = jdbc.queryForObject("SELECT * FROM directors WHERE id = ? ORDER BY id", mapper, id);
             return Optional.ofNullable(result);
@@ -53,17 +52,13 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director update(Director director) {
-        if (!isDirectorExist(director.getId())) {
-            throw new EntityNotFoundException(String.format("Director with id=%d not found", director.getId()));
-        }
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
         jdbc.update(sql, director.getName(), director.getId());
-
         return director;
     }
 
     @Override
-    public void delete(long directorId) {
+    public void delete(Long directorId) {
         String deleteFilmDirectorsSql = "DELETE FROM films_directors WHERE director_id = ?";
         jdbc.update(deleteFilmDirectorsSql, directorId);
 
@@ -72,13 +67,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public boolean isDirectorExist(long id) {
-        String sql = "SELECT COUNT(*) FROM directors WHERE id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
-    }
-
-    public List<Director> findDirectorsByFilmId(long id) {
+    public List<Director> findDirectorsByFilmId(Long id) {
         String sql = "SELECT d.id, d.name FROM films_directors fd " +
                 "JOIN directors d ON fd.director_id = d.id WHERE fd.film_id = ? ORDER BY d.id";
         return jdbc.query(sql, mapper, id);

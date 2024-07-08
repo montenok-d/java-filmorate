@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Feed {
+
     Long timestamp;
     Integer userId;
     String eventType;
