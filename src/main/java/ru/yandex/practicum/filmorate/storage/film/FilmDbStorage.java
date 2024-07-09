@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,10 +7,10 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -48,14 +48,14 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setInt(5, Integer.valueOf((int) film.getMpa().getId()));
+            ps.setLong(5, film.getMpa().getId());
             return ps;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         updateGenres(film);
         updateDirectors(film);
         long id = keyHolder.getKey().longValue();
-        return findFilmById(id).get();
+        return findById(id).get();
     }
 
     @Override
@@ -66,28 +66,18 @@ public class FilmDbStorage implements FilmStorage {
         deleteDirectors(film.getId());
         updateGenres(film);
         updateDirectors(film);
-        return findFilmById(film.getId()).get();
-    }
-
-    private void deleteGenres(long id) {
-        String query = "DELETE FROM films_genres WHERE film_id = ?";
-        jdbc.update(query, id);
-    }
-
-    private void deleteDirectors(long id) {
-        String deleteSql = "DELETE FROM films_directors WHERE film_id = ?";
-        jdbc.update(deleteSql, id);
+        return findById(film.getId()).get();
     }
 
     @Override
-    public void delete(long id) {
+    public void delete(Long id) {
         String query = "DELETE FROM films WHERE id = ?";
         jdbc.update(query, id);
         deleteGenres(id);
     }
 
     @Override
-    public Optional<Film> findFilmById(long id) {
+    public Optional<Film> findById(Long id) {
         String query = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
                 "m.id AS mpa_id, m.name AS mpa_name, " +
                 "FROM films AS f " +
@@ -102,27 +92,28 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(long filmId, long userId) {
+    public void addLike(Long filmId, Long userId) {
         String query = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
         jdbc.update(query, filmId, userId);
         jdbc.update(ADD_FEED, filmId, Instant.now().toEpochMilli(), userId, "LIKE", "ADD");
     }
 
     @Override
-    public void deleteLike(long filmId, long userId) {
+    public void deleteLike(Long filmId, Long userId) {
         String query = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
         jdbc.update(query, filmId, userId);
         jdbc.update(ADD_FEED, filmId, Instant.now().toEpochMilli(), userId, "LIKE", "REMOVE");
     }
 
     @Override
-    public List<Film> getPopular(int count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         List<Object> params = new ArrayList<>();
+
         String query = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name, " +
-                "count(l.user_id) as count " +
+                "COUNT(l.user_id) AS count " +
                 "FROM films f " +
                 "LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "JOIN likes l ON f.id = l.film_id " +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
                 "LEFT JOIN films_genres fg ON fg.film_id = f.id ";
         if (genreId.isPresent() || year.isPresent()) {
             query += "WHERE ";
@@ -139,7 +130,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
         query += "GROUP BY f.id " +
-                "ORDER BY count(l.user_id) desc " +
+                "ORDER BY count DESC " +
                 "LIMIT ? ";
         params.add(count);
         return jdbc.query(query, mapper, params.toArray());
@@ -170,6 +161,47 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY FILMS.ID " +
                 "ORDER BY CNT DESC ";
         return jdbc.query(sql, mapper, directorId);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        String sql = "SELECT * FROM (SELECT f.*, count(fl.film_id) likes, m.name AS mpa_name FROM films f " +
+                "LEFT JOIN likes fl on f.id = fl.film_id " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "GROUP BY f.id) f, likes l1, likes l2 " +
+                "WHERE f.id = l1.film_id AND f.id = l2.film_id AND l1.user_id = ? AND l2.user_id = ? " +
+                "ORDER BY likes DESC";
+        return jdbc.query(sql, mapper, userId, friendId);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "WHERE LOWER(f.name) LIKE LOWER(?)";
+        return jdbc.query(sql, mapper, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                "LEFT JOIN films_directors fd ON f.id = fd.film_id " +
+                "LEFT JOIN directors d ON fd.director_id = d.id " +
+                "WHERE LOWER(d.name) LIKE LOWER(?)";
+        return jdbc.query(sql, mapper, "%" + query + "%");
+    }
+
+    private void deleteGenres(Long id) {
+        String query = "DELETE FROM films_genres WHERE film_id = ?";
+        jdbc.update(query, id);
+    }
+
+    private void deleteDirectors(Long id) {
+        String deleteSql = "DELETE FROM films_directors WHERE film_id = ?";
+        jdbc.update(deleteSql, id);
     }
 
     private void updateGenres(Film film) {
@@ -209,36 +241,4 @@ public class FilmDbStorage implements FilmStorage {
             });
         }
     }
-
-    @Override
-    public List<Film> getCommonFilms(int id, int friendId) {
-        String sql = "SELECT * FROM (SELECT f.*, count(fl.film_id) likes, m.name AS mpa_name FROM films f " +
-                "LEFT JOIN likes fl on f.id = fl.film_id " +
-                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "GROUP BY f.id) f, likes l1, likes l2 " +
-                "WHERE f.id = l1.film_id AND f.id = l2.film_id AND l1.user_id = ? AND l2.user_id = ? " +
-                "ORDER BY likes DESC";
-        return jdbc.query(sql, mapper, id, friendId);
-    }
-
-    @Override
-    public List<Film> searchByTitle(String query) {
-        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
-                "FROM films f " +
-                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "WHERE LOWER(f.name) LIKE LOWER(?)";
-        return jdbc.query(sql, mapper, "%" + query + "%");
-    }
-
-    @Override
-    public List<Film> searchByDirector(String query) {
-        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.name AS mpa_name " +
-                "FROM films f " +
-                "LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "LEFT JOIN films_directors fd ON f.id = fd.film_id " +
-                "LEFT JOIN directors d ON fd.director_id = d.id " +
-                "WHERE LOWER(d.name) LIKE LOWER(?)";
-        return jdbc.query(sql, mapper, "%" + query + "%");
-    }
-
 }

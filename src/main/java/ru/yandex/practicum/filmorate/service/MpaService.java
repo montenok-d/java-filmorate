@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.Collection;
 
@@ -14,19 +12,14 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class MpaService {
 
-    private final MpaDbStorage mpaDbStorage;
+    private final MpaStorage mpaStorage;
 
     public Collection<Mpa> findAll() {
-        return mpaDbStorage.findAll();
+        return mpaStorage.findAll();
     }
 
-    public Mpa findMpaById(long id) {
-        return mpaDbStorage.findMpaById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Mpa № %d not found", id)));
-    }
-
-    public Mpa checkMpaForFilm(long id) {
-        return mpaDbStorage.findMpaById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(400), String.format("Mpa № %d not found", id)));
+    public Mpa findById(Long id) {
+        return mpaStorage.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("MPA № %d not found", id)));
     }
 }

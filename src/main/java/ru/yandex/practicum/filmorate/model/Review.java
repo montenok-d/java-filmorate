@@ -7,7 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class Review {
-    private long reviewId;
+
+    private Long reviewId;
     @NotNull
     private String content;
     @NotNull
@@ -16,5 +17,5 @@ public class Review {
     private Long userId;
     @NotNull
     private Long filmId;
-    private int useful;
+    private Integer useful;
 }

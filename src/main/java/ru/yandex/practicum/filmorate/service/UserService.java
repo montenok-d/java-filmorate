@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,52 +30,52 @@ public class UserService {
     }
 
     public User update(User user) {
-        findUserById(user.getId());
+        findById(user.getId());
         return userStorage.update(user);
     }
 
-    public void delete(long id) {
-        findUserById(id);
+    public void delete(Long id) {
+        findById(id);
         userStorage.delete(id);
     }
 
-    public User findUserById(long id) {
+    public User findById(Long id) {
         return userStorage.findUserById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d не найден", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d not found", id)));
     }
 
-    public void addFriend(long id, long friendId) {
-        User user = findUserById(id);
-        User friend = findUserById(friendId);
-        userStorage.addFriend(id, friendId);
+    public void addFriend(Long userId, Long friendId) {
+        findById(userId);
+        findById(friendId);
+        userStorage.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(long id, long friendId) {
-        User user = findUserById(id);
-        User friend = findUserById(friendId);
-        userStorage.deleteFriend(id, friendId);
+    public void deleteFriend(Long userId, Long friendId) {
+        findById(userId);
+        findById(friendId);
+        userStorage.deleteFriend(userId, friendId);
     }
 
-    public List<User> findAllFriends(long id) {
-        User user = findUserById(id);
-        return userStorage.findAllFriends(id);
+    public List<User> findAllFriends(Long userId) {
+        findById(userId);
+        return userStorage.findAllFriends(userId);
     }
 
-    public List<User> findMutualFriends(long firstUser, long secondUser) {
+    public List<User> findMutualFriends(Long firstUser, Long secondUser) {
         return userStorage.findMutualFriends(firstUser, secondUser);
+    }
+
+    public List<Feed> getFeedByUserId(Long userId) {
+        findById(userId);
+        return userStorage.getFeedByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(Feed::getTimestamp))
+                .toList();
     }
 
     private void validateName(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-    }
-
-    public List<Long> getUsersFilms(Long userId) {
-        return userStorage.getUsersFilmsIds(userId);
-    }
-
-    public List<Feed> getFeedByUserId(Long userId) {
-        return userStorage.getFeedByUserId(userId).stream().sorted(Comparator.comparing(Feed::getTimestamp)).toList();
     }
 }

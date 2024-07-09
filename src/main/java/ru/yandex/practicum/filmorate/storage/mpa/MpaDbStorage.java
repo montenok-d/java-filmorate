@@ -1,32 +1,33 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.mpa;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
 
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MpaDbStorage {
-
-    private static final String FIND_ALL_QUERY = "SELECT * FROM mpa";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM mpa WHERE id = ?";
+public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbc;
     private final MpaRowMapper mapper;
 
+    @Override
     public Collection<Mpa> findAll() {
-        return jdbc.query(FIND_ALL_QUERY, mapper);
+        String query = "SELECT * FROM mpa";
+        return jdbc.query(query, mapper);
     }
 
-    public Optional<Mpa> findMpaById(long id) {
+    @Override
+    public Optional<Mpa> findById(Long id) {
         try {
-            Mpa result = jdbc.queryForObject(FIND_BY_ID_QUERY, mapper, id);
+            String query = "SELECT * FROM mpa WHERE id = ?";
+            Mpa result = jdbc.queryForObject(query, mapper, id);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();

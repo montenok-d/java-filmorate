@@ -9,9 +9,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class MpaStorageDbTest {
 
     @Test
     void getMpaByIdTest() {
-        Optional<Mpa> mpa = mpaDbStorage.findMpaById(1L);
+        Optional<Mpa> mpa = mpaDbStorage.findById(1L);
         Assertions.assertThat(mpa)
                 .isPresent()
                 .hasValueSatisfying(m ->
@@ -45,4 +45,3 @@ public class MpaStorageDbTest {
         assertEquals(5, mpas.size());
     }
 }
-

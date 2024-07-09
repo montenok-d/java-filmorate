@@ -34,47 +34,48 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public Review findById(@PathVariable("id") long id) {
+    public Review findById(@PathVariable("id") Long id) {
         log.info("GET /reviews/{}", id);
         return reviewService.findById(id);
     }
 
     @GetMapping
     public List<Review> getAll(@RequestParam Optional<Long> filmId,
-                               @RequestParam(defaultValue = "10") @Positive int count) {
+                               @RequestParam(defaultValue = "10") @Positive Long count) {
         log.info("GET /reviews/");
         return reviewService.getAll(filmId, count);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") long id) {
+    public void delete(@PathVariable("id") Long id) {
+        log.info("DELETE /reviews/{}", id);
         reviewService.delete(id);
     }
 
     @PutMapping("{id}/like/{userId}")
-    public void addLike(@PathVariable("id") long reviewId,
-                        @PathVariable("userId") long userId) {
+    public void addLike(@PathVariable("id") Long reviewId,
+                        @PathVariable("userId") Long userId) {
         log.info("PUT reviews/{}/like/{}", reviewId, userId);
         reviewService.addLike(reviewId, userId);
     }
 
     @PutMapping("{id}/dislike/{userId}")
-    public void addDislike(@PathVariable("id") long reviewId,
-                           @PathVariable("userId") long userId) {
+    public void addDislike(@PathVariable("id") Long reviewId,
+                           @PathVariable("userId") Long userId) {
         log.info("PUT reviews/{}/dislike/{}", reviewId, userId);
         reviewService.addDislike(reviewId, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") long reviewId,
-                        @PathVariable("userId") long userId) {
+    public void deleteLike(@PathVariable("id") Long reviewId,
+                           @PathVariable("userId") Long userId) {
         log.info("DELETE reviews/{}/like/{}", reviewId, userId);
         reviewService.deleteLike(reviewId, userId);
     }
 
     @DeleteMapping("{id}/dislike/{userId}")
-    public void deleteDislike(@PathVariable("id") long reviewId,
-                           @PathVariable("userId") long userId) {
+    public void deleteDislike(@PathVariable("id") Long reviewId,
+                              @PathVariable("userId") Long userId) {
         log.info("DELETE reviews/{}/dislike/{}", reviewId, userId);
         reviewService.deleteDislike(reviewId, userId);
     }
