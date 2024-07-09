@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
@@ -34,14 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {FilmDbStorage.class, MpaDbStorage.class, FilmRowMapper.class, MpaRowMapper.class,
         GenreDbStorage.class, GenreRowMapper.class, MpaService.class, UserDbStorage.class, UserRowMapper.class,
-        DirectorDbStorage.class, DirectorRowMapper.class, FeedRowMapper.class, LikeDbStorage.class, LikeRowMapper.class})
+        DirectorDbStorage.class, DirectorRowMapper.class, FeedRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/films.sql"})
 class FilmStorageDbTest {
 
     private final FilmDbStorage filmDbStorage;
     private final MpaDbStorage mpaDbStorage;
-    private final LikeDbStorage likeDbStorage;
     private final UserDbStorage userDbStorage;
 
     @Test

@@ -19,13 +19,15 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> findAll() {
-        return jdbc.query("SELECT * FROM mpa", mapper);
+        String query = "SELECT * FROM mpa";
+        return jdbc.query(query, mapper);
     }
 
     @Override
     public Optional<Mpa> findById(Long id) {
         try {
-            Mpa result = jdbc.queryForObject("SELECT * FROM mpa WHERE id = ?", mapper, id);
+            String query = "SELECT * FROM mpa WHERE id = ?";
+            Mpa result = jdbc.queryForObject(query, mapper, id);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();

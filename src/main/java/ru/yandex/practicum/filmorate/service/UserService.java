@@ -65,11 +65,6 @@ public class UserService {
         return userStorage.findMutualFriends(firstUser, secondUser);
     }
 
-    public List<Long> getUsersFilms(Long userId) {
-        findById(userId);
-        return userStorage.getUsersFilmsIds(userId);
-    }
-
     public List<Feed> getFeedByUserId(Long userId) {
         findById(userId);
         return userStorage.getFeedByUserId(userId)

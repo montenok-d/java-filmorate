@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,19 +14,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecommendationService {
 
-    private final UserService userService;
-    private final FilmService filmService;
+    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
 
     public Set<Film> findRecommendations(Long userId) {
         Map<Long, List<Long>> usersFilms = new HashMap<>();
-        Collection<User> allUsers = userService.findAll();
+        Collection<User> allUsers = userStorage.findAll();
         for (User user : allUsers) {
-            usersFilms.put(user.getId(), userService.getUsersFilms(user.getId()));
+            usersFilms.put(user.getId(), userStorage.getUsersFilmsIds(user.getId()));
         }
         long countMatches = 0;
         Long mostCloseUser = null;
         for (Long otherUserId : usersFilms.keySet()) {
-            if (otherUserId == userId) continue;
+            if (Objects.equals(otherUserId, userId)) continue;
             long numberOfMatches = usersFilms.get(otherUserId).stream()
                     .filter(filmId -> usersFilms.get(userId).contains(filmId)).count();
             if (numberOfMatches == countMatches & numberOfMatches != 0) {
@@ -37,9 +39,9 @@ public class RecommendationService {
         if (countMatches == 0) {
             return new HashSet<>();
         } else {
-            return userService.getUsersFilms(mostCloseUser).stream()
+            return userStorage.getUsersFilmsIds(mostCloseUser).stream()
                     .filter(filmId -> !usersFilms.get(userId).contains(filmId))
-                    .map(filmService::findById)
+                    .map(id -> filmStorage.findById(id).get())
                     .collect(Collectors.toSet());
         }
     }

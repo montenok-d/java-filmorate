@@ -1,32 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private final UserService userService;
-    private final MpaService mpaService;
-    private final GenreService genreService;
-    private final DirectorService directorService;
-
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, UserService userService, MpaService mpaService, GenreService genreService, DirectorService directorService) {
-        this.filmStorage = filmStorage;
-        this.userService = userService;
-        this.mpaService = mpaService;
-        this.genreService = genreService;
-        this.directorService = directorService;
-    }
+    private final UserStorage userStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public Collection<Film> findAll() {
         log.info("filmStorage.findAll");
@@ -34,10 +31,10 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        mpaService.findById(film.getMpa().getId());
+        checkMpaExists(film.getMpa().getId());
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
-                genreService.findById(genre.getId());
+                checkGenreExists(genre.getId());
             }
         }
         return filmStorage.create(film);
@@ -60,13 +57,13 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         findById(filmId);
-        userService.findById(userId);
+        checkUserExists(userId);
         filmStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
         findById(filmId);
-        userService.findById(userId);
+        checkUserExists(userId);
         filmStorage.deleteLike(filmId, userId);
     }
 
@@ -75,7 +72,7 @@ public class FilmService {
     }
 
     public List<Film> getDirectorFilms(String sortBy, Long directorId) {
-        directorService.findById(directorId);
+        checkDirectorExists(directorId);
         if (sortBy.equalsIgnoreCase("year")) {
             return filmStorage.getDirectorFilmsByYear(directorId);
         } else if (sortBy.equalsIgnoreCase("likes")) {
@@ -114,5 +111,25 @@ public class FilmService {
             }
         }
         return combinedFilms;
+    }
+
+    private void checkUserExists(Long id) {
+        userStorage.findUserById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User № %d not found", id)));
+    }
+
+    private void checkMpaExists(Long id) {
+        mpaStorage.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Mpa № %d not found", id)));
+    }
+
+    private void checkGenreExists(Long id) {
+        genreStorage.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Genre № %d not found", id)));
+    }
+
+    private void checkDirectorExists(Long id) {
+        directorStorage.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Director № %d not found", id)));
     }
 }

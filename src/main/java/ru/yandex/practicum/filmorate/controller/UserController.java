@@ -5,14 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Feed;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.RecommendationService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -21,7 +18,6 @@ import java.util.Set;
 public class UserController {
 
     private final UserService userService;
-    private final RecommendationService recommendationService;
 
     @GetMapping
     public Collection<User> findAll() {
@@ -78,12 +74,6 @@ public class UserController {
                                         @PathVariable("otherId") Long secondUser) {
         log.info("PUT /{}/friends/common/{}", firstUser, secondUser);
         return userService.findMutualFriends(firstUser, secondUser);
-    }
-
-    @GetMapping("/{id}/recommendations")
-    public Set<Film> findRecommendations(@PathVariable("id") Long userId) {
-        log.info("GET /{}/recommendations", userId);
-        return recommendationService.findRecommendations(userId);
     }
 
     @GetMapping("/{id}/feed")

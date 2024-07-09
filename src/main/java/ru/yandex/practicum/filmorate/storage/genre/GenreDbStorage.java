@@ -27,7 +27,8 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Optional<Genre> findById(Long id) {
         try {
-            Genre result = jdbc.queryForObject("SELECT * FROM genres WHERE id = ?", mapper, id);
+            String query = "SELECT * FROM genres WHERE id = ?";
+            Genre result = jdbc.queryForObject(query, mapper, id);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();
@@ -36,7 +37,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public List<Genre> findGenresByFilmId(Long id) {
-        return jdbc.query("SELECT g.id, g.name FROM films_genres fg " +
-                "JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ? ORDER BY g.id", mapper, id);
+        String query = "SELECT g.id, g.name FROM films_genres fg " +
+                "JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ? ORDER BY g.id";
+        return jdbc.query(query, mapper, id);
     }
 }

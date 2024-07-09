@@ -7,7 +7,6 @@ import org.springframework.util.CollectionUtils;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,12 +21,10 @@ public class FilmRowMapper implements RowMapper<Film> {
 
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
-    private final LikeStorage likeStorage;
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         Set<Genre> genres = new LinkedHashSet<>(genreStorage.findGenresByFilmId(rs.getLong("id")));
-        Set<Like> likes = new LinkedHashSet<>(likeStorage.getLikesByFilmId(rs.getLong("id")));
         Set<Director> directorSet = new HashSet<>();
         List<Director> directors = directorStorage.findDirectorsByFilmId(rs.getLong("id"));
 
@@ -46,7 +43,6 @@ public class FilmRowMapper implements RowMapper<Film> {
                         .name(rs.getString("mpa_name"))
                         .build())
                 .genres(genres)
-                .likes(likes)
                 .directors(directorSet)
                 .build();
     }
