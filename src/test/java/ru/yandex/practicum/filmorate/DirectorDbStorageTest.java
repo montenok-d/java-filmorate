@@ -20,7 +20,6 @@ import java.util.Optional;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class DirectorDbStorageTest {
 
-
     private final DirectorDbStorage directorDbStorage;
 
     private Director director1;
