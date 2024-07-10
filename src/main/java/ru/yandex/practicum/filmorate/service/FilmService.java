@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class FilmService {
 
@@ -26,8 +25,9 @@ public class FilmService {
     private final DirectorStorage directorStorage;
 
     public Collection<Film> findAll() {
-        log.info("filmStorage.findAll");
-        return filmStorage.findAll();
+        Collection<Film> allFilms = filmStorage.findAll();
+        allFilms.forEach(this::addGenresAndDirectors);
+        return allFilms;
     }
 
     public Film create(Film film) {
@@ -37,53 +37,69 @@ public class FilmService {
                 checkGenreExists(genre.getId());
             }
         }
-        return filmStorage.create(film);
+        film = filmStorage.create(film);
+        addGenresAndDirectors(film);
+        return film;
     }
 
     public Film update(Film film) {
-        findById(film.getId());
-        return filmStorage.update(film);
+        checkFilmExists(film.getId());
+        film = filmStorage.update(film);
+        addGenresAndDirectors(film);
+        return film;
     }
 
     public void delete(Long id) {
-        findById(id);
+        checkFilmExists(id);
         filmStorage.delete(id);
     }
 
     public Film findById(Long id) {
-        return filmStorage.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d not found", id)));
+        checkFilmExists(id);
+        Film film = filmStorage.findById(id).get();
+        addGenresAndDirectors(film);
+        return film;
     }
 
     public void addLike(Long filmId, Long userId) {
-        findById(filmId);
+        checkFilmExists(filmId);
         checkUserExists(userId);
         filmStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        findById(filmId);
+        checkFilmExists(filmId);
         checkUserExists(userId);
         filmStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
-        return filmStorage.getPopular(count, genreId, year);
+        List<Film> popularFilms = filmStorage.getPopular(count, genreId, year);
+        popularFilms.forEach(this::addGenresAndDirectors);
+        return popularFilms;
+
     }
 
     public List<Film> getDirectorFilms(String sortBy, Long directorId) {
         checkDirectorExists(directorId);
+        List<Film> films = new ArrayList<>();
         if (sortBy.equalsIgnoreCase("year")) {
-            return filmStorage.getDirectorFilmsByYear(directorId);
+            films = filmStorage.getDirectorFilmsByYear(directorId);
+            films.forEach(this::addGenresAndDirectors);
+            return films;
         } else if (sortBy.equalsIgnoreCase("likes")) {
-            return filmStorage.getDirectorFilmsByLikes(directorId);
+            films = filmStorage.getDirectorFilmsByLikes(directorId);
+            films.forEach(this::addGenresAndDirectors);
+            return films;
         } else {
             throw new IllegalArgumentException("Unsupported sortBy option: " + sortBy);
         }
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return filmStorage.getCommonFilms(userId, friendId);
+        List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+        commonFilms.forEach(this::addGenresAndDirectors);
+        return commonFilms;
     }
 
     public List<Film> searchFilms(String query, String by) {
@@ -110,7 +126,13 @@ public class FilmService {
                 combinedFilms.add(film);
             }
         }
+        combinedFilms.forEach(this::addGenresAndDirectors);
         return combinedFilms;
+    }
+
+    private void checkFilmExists(Long id) {
+        filmStorage.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Film № %d not found", id)));
     }
 
     private void checkUserExists(Long id) {
@@ -131,5 +153,13 @@ public class FilmService {
     private void checkDirectorExists(Long id) {
         directorStorage.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Director № %d not found", id)));
+    }
+
+    private Film addGenresAndDirectors(Film film) {
+        Set<Genre> genres = new LinkedHashSet<>(genreStorage.findGenresByFilmId(film.getId()));
+        Set<Director> directors = new LinkedHashSet<>(directorStorage.findDirectorsByFilmId(film.getId()));
+        film.setGenres(genres);
+        film.setDirectors(directors);
+        return film;
     }
 }

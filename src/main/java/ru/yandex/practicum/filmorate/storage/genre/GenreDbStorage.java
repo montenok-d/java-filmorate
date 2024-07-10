@@ -7,9 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -36,9 +34,9 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> findGenresByFilmId(Long id) {
+    public Set<Genre> findGenresByFilmId(Long id) {
         String query = "SELECT g.id, g.name FROM films_genres fg " +
                 "JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ? ORDER BY g.id";
-        return jdbc.query(query, mapper, id);
+        return new LinkedHashSet<>(jdbc.query(query, mapper, id));
     }
 }

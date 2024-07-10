@@ -2,9 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -16,6 +20,8 @@ public class RecommendationService {
 
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public Set<Film> findRecommendations(Long userId) {
         Map<Long, List<Long>> usersFilms = new HashMap<>();
@@ -39,10 +45,20 @@ public class RecommendationService {
         if (countMatches == 0) {
             return new HashSet<>();
         } else {
-            return userStorage.getUsersFilmsIds(mostCloseUser).stream()
+            Set<Film> recommendedFilms = userStorage.getUsersFilmsIds(mostCloseUser).stream()
                     .filter(filmId -> !usersFilms.get(userId).contains(filmId))
                     .map(id -> filmStorage.findById(id).get())
                     .collect(Collectors.toSet());
+            recommendedFilms.forEach(this::addGenresAndDirectors);
+            return recommendedFilms;
         }
+    }
+
+    private Film addGenresAndDirectors(Film film) {
+        Set<Genre> genres = new LinkedHashSet<>(genreStorage.findGenresByFilmId(film.getId()));
+        Set<Director> directors = new LinkedHashSet<>(directorStorage.findDirectorsByFilmId(film.getId()));
+        film.setGenres(genres);
+        film.setDirectors(directors);
+        return film;
     }
 }
