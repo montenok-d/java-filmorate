@@ -7,4 +7,4 @@ Java, Spring Boot, Maven, Lombok, JDBC, H2
 
 ### Схема базы данных
 
-![Database scheme](images/db_scheme.png)
+![Database scheme](images/db_diagram.png)

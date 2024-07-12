@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +7,15 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.mapper.FeedRowMapper;
+import ru.yandex.practicum.filmorate.mapper.UserRowMapper;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +29,8 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper mapper;
+    private final FeedRowMapper feedRowMapper;
+    private static final String ADD_FEED = "INSERT INTO feed (entity_id, timestamp, user_id, event_type, operation) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public Collection<User> findAll() {
@@ -63,7 +68,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void delete(long id) {
+    public void delete(Long id) {
         String query = "DELETE FROM users WHERE id = ?";
         int rowsDeleted = jdbc.update(query, id);
         if (rowsDeleted > 0) {
@@ -74,7 +79,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> findUserById(long id) {
+    public Optional<User> findUserById(Long id) {
         String query = "SELECT * FROM users WHERE id = ?";
         try {
             User result = jdbc.queryForObject(query, mapper, id);
@@ -85,20 +90,22 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(long userId, long friendId) {
+    public void addFriend(Long userId, Long friendId) {
         String query = "INSERT into friends (user_id, friend_id, status) VALUES(?, ?, FALSE)";
         jdbc.update(query, userId, friendId);
+        jdbc.update(ADD_FEED, friendId, Instant.now().toEpochMilli(), userId, "FRIEND", "ADD");
     }
 
     @Override
-    public void deleteFriend(long id, long friendId) {
+    public void deleteFriend(Long id, Long friendId) {
         String query = "DELETE FROM friends " +
                 "WHERE user_id = ? AND friend_id = ?";
         jdbc.update(query, id, friendId);
+        jdbc.update(ADD_FEED, friendId, Instant.now().toEpochMilli(), id, "FRIEND", "REMOVE");
     }
 
     @Override
-    public List<User> findMutualFriends(long firstUserId, long secondUserId) {
+    public List<User> findMutualFriends(Long firstUserId, Long secondUserId) {
         String query = "SELECT u.id, u.email, u.login, u.name, u.birthday " +
                 "FROM users AS u " +
                 "INNER JOIN friends f1 ON u.id = f1.friend_id " +
@@ -108,7 +115,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> findAllFriends(long id) {
+    public List<User> findAllFriends(Long id) {
         String query = "SELECT * FROM users u " +
                 "JOIN FRIENDS f ON u.ID = f.FRIEND_ID " +
                 "WHERE f.USER_ID = ? " +
@@ -118,4 +125,15 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(query, mapper, id, id);
     }
 
+    @Override
+    public List<Long> getUsersFilmsIds(Long userId) {
+        String sql = "SELECT film_id FROM likes WHERE user_id = ?";
+        return jdbc.query(sql, (rs, rowNum) -> rs.getLong("film_id"), userId);
+    }
+
+    @Override
+    public List<Feed> getFeedByUserId(Long userId) {
+        String query = "SELECT * FROM feed WHERE user_id = ?";
+        return jdbc.query(query, feedRowMapper, userId);
+    }
 }

@@ -10,13 +10,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDate;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Builder
 public class Film {
-    private long id;
+
+    private Long id;
     @NotBlank(message = "name cannot be empty")
     private String name;
     @Size(max = 200)
@@ -26,7 +26,8 @@ public class Film {
     @ReleaseDate(value = "1895-12-28", message = "Release date should be after December 28, 1895.")
     private LocalDate releaseDate;
     @Positive
-    private int duration;
-    private Set<Genre> genres = new HashSet<>();
+    private Integer duration;
+    private Set<Genre> genres;
     private Mpa mpa;
+    private Set<Director> directors;
 }

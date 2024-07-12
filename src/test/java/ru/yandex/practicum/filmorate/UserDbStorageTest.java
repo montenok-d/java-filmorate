@@ -9,8 +9,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.mapper.FeedRowMapper;
+import ru.yandex.practicum.filmorate.mapper.UserRowMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ContextConfiguration(classes = {UserDbStorage.class, UserRowMapper.class})
+@ContextConfiguration(classes = {UserDbStorage.class, UserRowMapper.class, FeedRowMapper.class})
 class UserDbStorageTest {
 
     private final UserDbStorage userStorage;

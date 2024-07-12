@@ -9,9 +9,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {MpaDbStorage.class, MpaRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(scripts = {"/films.sql"})
+@Sql(scripts = {"/data.sql"})
 public class MpaStorageDbTest {
     private final MpaDbStorage mpaDbStorage;
 
     @Test
     void getMpaByIdTest() {
-        Optional<Mpa> mpa = mpaDbStorage.findMpaById(1L);
+        Optional<Mpa> mpa = mpaDbStorage.findById(1L);
         Assertions.assertThat(mpa)
                 .isPresent()
                 .hasValueSatisfying(m ->
@@ -45,4 +45,3 @@ public class MpaStorageDbTest {
         assertEquals(5, mpas.size());
     }
 }
-

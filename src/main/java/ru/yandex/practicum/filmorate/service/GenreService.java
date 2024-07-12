@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.Collection;
 
@@ -14,19 +12,14 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreService {
 
-    private final GenreDbStorage genreDbStorage;
+    private final GenreStorage genreStorage;
 
     public Collection<Genre> findAll() {
-        return genreDbStorage.findAll();
+        return genreStorage.findAll();
     }
 
-    public Genre findGenreById(long id) {
-        return genreDbStorage.findGenreById(id)
+    public Genre findById(Long id) {
+        return genreStorage.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Genre № %d not found", id)));
-    }
-
-    public Genre checkGenreById(long id) {
-        return genreDbStorage.findGenreById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(400),String.format("Genre № %d not found", id)));
     }
 }

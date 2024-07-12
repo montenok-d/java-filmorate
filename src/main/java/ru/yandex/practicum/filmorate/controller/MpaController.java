@@ -19,7 +19,6 @@ public class MpaController {
 
     private final MpaService mpaService;
 
-
     @GetMapping
     public Collection<Mpa> getAll() {
         log.info("GET /mpa");
@@ -27,9 +26,8 @@ public class MpaController {
     }
 
     @GetMapping("/{id}")
-    public Mpa findMpaById(@PathVariable("id") int id) {
+    public Mpa findMpaById(@PathVariable("id") Long id) {
         log.info("GET /mpa/{}", id);
-        return mpaService.findMpaById(id);
+        return mpaService.findById(id);
     }
-
 }

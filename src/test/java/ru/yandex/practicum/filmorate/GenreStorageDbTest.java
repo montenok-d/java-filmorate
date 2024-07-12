@@ -10,8 +10,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.mapper.GenreRowMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {GenreDbStorage.class, GenreRowMapper.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(scripts = {"/films.sql"})
+@Sql(scripts = {"/data.sql"})
 public class GenreStorageDbTest {
     private final GenreDbStorage genreDbStorage;
 
     @Test
     void getMpaByIdTest() {
-        Optional<Genre> genre = genreDbStorage.findGenreById(1L);
+        Optional<Genre> genre = genreDbStorage.findById(1L);
         Assertions.assertThat(genre)
                 .isPresent()
                 .hasValueSatisfying(g ->

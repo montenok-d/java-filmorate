@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Mpa {
+public class Director {
 
     private Long id;
     @NotBlank
